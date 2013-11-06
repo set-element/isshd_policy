@@ -12,7 +12,7 @@
 #   human readable output which makes for such good reading ...
 #
 
-@load sshd_const
+@load isshd_policy/sshd_const
 @load host_core/user_core
 
 module SSHD_CORE;

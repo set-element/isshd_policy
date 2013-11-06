@@ -6,8 +6,8 @@
 #
 #
 
-@load sshd_analyzer_cluster
-@load sshd_sftp3_cluster
+@load isshd_policy/sshd_analyzer_cluster
+@load isshd_policy/sshd_sftp3_cluster
 
 event sftp_process_close(ts:time, sid:string, cid:count, id: int, handle:int)
 	{

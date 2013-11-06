@@ -19,7 +19,7 @@
 #	client_id: <client-pid>	count
 #
 # for cluster we need the following:
-@load sshd_core_cluster
+@load isshd_policy/sshd_core_cluster
 
 module SSHD_ANALYZER;
 

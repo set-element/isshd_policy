@@ -6,7 +6,7 @@
 #  that the local site policy will be audited (and possible enforced ehre).
 #
 
-@load sshd_core_cluster
+@load isshd_policy/sshd_core_cluster
 
 module SSHD_POLICY;
 

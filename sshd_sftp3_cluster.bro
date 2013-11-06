@@ -7,7 +7,7 @@
 # For cluster format the logging specific to sftp will get broken out into it's own logging
 #   table to reduce "clutter" for the basic ssh logging.
 
-@load sshd_core_cluster
+@load isshd_policy/sshd_core_cluster
 module SFTP_AUDIT;
 
 export {
