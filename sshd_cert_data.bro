@@ -1,5 +1,5 @@
 
-redef bad_key_list = {
+redef SSHD_POLICY::bad_key_list = {
 "00:1b:b7:4c:04:a9:fc:90:c8:74:15:27:74:65:79:70",
 "00:1e:0d:9d:ed:23:5e:7f:6f:11:35:1e:0b:8f:bb:d6",
 "00:20:bc:e9:55:e4:e0:80:ce:15:f5:1c:ec:e6:6b:83",
