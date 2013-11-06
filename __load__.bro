@@ -1,6 +1,7 @@
 #
 #
 @load isshd_policy/sshd_const.bro
+@load isshd_policy/sshd_input_stream.bro
 #
 @load isshd_policy/sshd_analyzer_cluster.bro
 @load isshd_policy/sshd_sftp_cluster.bro
