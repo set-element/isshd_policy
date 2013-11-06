@@ -35,8 +35,14 @@ export {
 	global v16: vector of count = vector(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
 	global v2s: vector of count = vector(2,4,6);
 
-	# location of input file
-	const data_file = "/trace/sshd_logs/ssh_logging" &redef;
+	# location of input file this should be changed
+	const data_file = "/" &redef;
+	# flag to make the current node active re the input framework
+	#  it is activated by setting 'aux_scripts="isshd_policy/init_node"'
+	#  in the etc/node.cfg .  See the isshd_policy/init_node.bro for 
+	#  more details.
+	const DATANODE = F &redef;
+	
 	# semiphore for in-fr restart
 	global stop_sem = 0;
 
@@ -2645,16 +2651,23 @@ event transaction_rate()
 	schedule input_test_interval { transaction_rate() };
 	}
 
-event bro_init()
+event init_datastream()
 	{
+
 	# input stream setup
-	if ( (Cluster::local_node_type() == Cluster::WORKER) && (file_size(data_file) != -1.0) ) {
+	
+	if ( DATANODE && (file_size(data_file) != -1.0) ) {
 		print fmt("%s SSHD data file %s located", gethostname(), data_file);
 		Input::add_event([$source=data_file, $reader=Input::READER_RAW, $mode=Input::TSTREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 
 		# start rate monitoring for event stream 
 		schedule input_test_interval { transaction_rate() };
 		}
-	else
-		print fmt("%s SSHD data file %s not found", gethostname(), data_file);
+	#else
+	#	print fmt("%s SSHD data file %s not found", gethostname(), data_file);
+	}
+
+event bro_init()
+	{
+	schedule 1 sec { init_datastream() };
 	}
