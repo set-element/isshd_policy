@@ -357,6 +357,15 @@ function print_sid(sid: string) : string
 
 	if ( |split_on_space| > 1 )
 		ret_val = split_on_space[2];
+	else {
+		# It might be the case that the sid is of the form 
+		#  5173_cvrsvc01_22 in which case we must snip on a
+		#  different value ...
+		local split_on_score = split(sid, /_/);
+	
+		if ( |split_on_score| > 1 )
+			ret_val = split_on_score[2];
+		}
 
 	return ret_val;
 	}
