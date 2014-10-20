@@ -15,6 +15,7 @@ export {
 	redef enum Notice::Type += {
 		SSHD_INPUT_UnknownEvent,
 		SSHD_INPUT_LowTransactionRate,
+		SSHD_INPUT_HighTransactionRate,
 		};
 
 	## table holding map between event name -> handling function
@@ -50,6 +51,7 @@ export {
 	const notify_unknown_event = F;
 
 	# track the transaction rate - notice on transition between low and high water rates
+	# this is count per input_test_interval
 	const input_count_test = T &redef;
 	const input_low_water:count = 10 &redef; 
 	const input_high_water:count = 100 &redef; 
@@ -119,7 +121,6 @@ function ssh_string(s: string) : string
 
 function ssh_count(s: string) : count
 	{
-	#print fmt("ssh_count in: %s", s);
 	local key_val = split1(s, /=/);
 	local ret_val: count = 0;
 
@@ -1617,9 +1618,6 @@ function _ssh_connection_end_2(_data: string) : count
 
 function _ssh_connection_start(_data: string) : count
 	{
-	# this is stubbed out
-	#return 0;
-
 	# event ssh_connection_start(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
 	# event ssh_connection_start(ts:time, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
 	local parts = split(_data, kv_splitter);
@@ -2550,7 +2548,6 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 					}
 				}
 
-
 			# this is a bit arbitrary for now
 			if ( l_parts > 10 ) {
 
@@ -2567,7 +2564,6 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 						local t_data: string = fmt("%s%s", m_event[n], m_event[n+1]);
 						local t_event: string = strip(fmt("%s",m_event[n]));
 						LV$d = t_data;
-						#print fmt("FIX: |%s|",t_event );
 						dispatcher[t_event](LV$d);
 						}
 					}
@@ -2600,6 +2596,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 
 event stop_reader()
 	{
+	print "stop reader";
 	if ( stop_sem == 0 ) {
 		Input::remove("isshd");
 		stop_sem = 1;
@@ -2608,6 +2605,7 @@ event stop_reader()
 
 event start_reader()
 	{
+	print "start reader";
 	if ( stop_sem == 1 ) { 
 		Input::add_event([$source=data_file, $reader=Input::READER_RAW, $mode=Input::TSTREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 		stop_sem = 0;
@@ -2616,31 +2614,42 @@ event start_reader()
 
 event transaction_rate()
 	{
-	#if ( ! input_count_test )
-	#	return;
-
+	# Values for input_count_state:
+	#  0=pre-init, 1=ok, 2=in error
+	# We make the assumption here that the low_water < high_water
 	local delta = input_count - input_count_prev;
-	print fmt("Log delta: %s", delta);
+	print fmt("%s Log delta: %s", network_time(),delta);
 
 	# rate is too low - send a notice the first time
-	if ( (delta > 0) && (delta < input_low_water) ) {
+	if (delta <= input_low_water) {
 
 		# only send the notice on the first instance 
-		if ( input_count_state != 2 )
+		if ( input_count_state != 2 ) {
 			NOTICE([$note=SSHD_INPUT_LowTransactionRate,
 				$msg=fmt("event rate %s per %s", delta, input_test_interval)]);
-		
-		input_count_state = 2; # 2: low transaction rate	
-		}
 
-	# perhaps the data file has rotated out from under the input descriptor?
-	if (delta < input_low_water) {
+			input_count_state = 2; # 2: transaction rate	
+			}
+
+		# Now reset the reader		
 		schedule 1 sec { stop_reader() };
 		schedule 10 sec { start_reader() };
 		}
 
+	# rate is too high - send a notice the first time
+	if (delta >= input_high_water) {
+
+		# only send the notice on the first instance 
+		if ( input_count_state != 2 ) {
+			NOTICE([$note=SSHD_INPUT_HighTransactionRate,
+				$msg=fmt("event rate %s per %s", delta, input_test_interval)]);
+
+			input_count_state = 2; # 2: transaction rate	
+			}
+		}
+
 	# rate is ok
-	if ( (delta > 0) && (delta > input_low_water) ) {
+	if ( (delta > input_low_water) && (delta < input_high_water) ) {
 		input_count_state = 1;
 		}
 
@@ -2651,7 +2660,7 @@ event transaction_rate()
 	schedule input_test_interval { transaction_rate() };
 	}
 
-event init_datastream()
+function init_datastream() : count
 	{
 
 	# input stream setup
@@ -2663,11 +2672,11 @@ event init_datastream()
 		# start rate monitoring for event stream 
 		schedule input_test_interval { transaction_rate() };
 		}
-	#else
-	#	print fmt("%s SSHD data file %s not found", gethostname(), data_file);
+
+	return 0;
 	}
 
 event bro_init()
 	{
-	schedule 1 sec { init_datastream() };
+	init_datastream();
 	}
