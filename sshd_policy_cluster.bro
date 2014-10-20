@@ -54,17 +54,17 @@ export {
 	#
 	global auth_invalid_user_notice = T &redef;
 	global auth_pass_attempt_notice = F &redef;
-	global channel_pass_skip_notice = T &redef;
+	global channel_pass_skip_notice = F &redef;
 	global channel_port_open_notice = F &redef;
 	global channel_portfwd_req_notice = F &redef;
 	global channel_post_fwd_listener_notice = F &redef;
 	global channel_set_fwd_listener_notice = F &redef;
-	global channel_socks4_notice = F &redef;
-	global channel_socks5_notice = F &redef;
+	global channel_socks4_notice = T &redef;
+	global channel_socks5_notice = T &redef;
 	global session_input_channel_open_notice = F &redef;
 	global session_new_notice = F &redef;
 	global session_request_direct_tcpip_notice = F &redef;
-	global session_tun_init_notice = F &redef;
+	global session_tun_init_notice = T &redef;
 	global session_x11fwd_notice = F &redef;
 
 	######################################################################################
@@ -75,11 +75,23 @@ export {
 	# suspicous commands 
 	global notify_suspicous_command = T &redef;
 
-	global suspicous_threshold: count = 5 &redef;
+	global suspicous_threshold: count = 2 &redef;
 	global suspicous_command_list = 
 		/^who/
 		| /^rpcinfo/
 		| /uname -a/
+		# it is quite handy that code writers tell us what they are doing ..
+		| /[Ll][Ii][Nn][Uu][Xx][[:blank:]]*([Ll][Oo0][Cc][Aa][Ll]|[Kk][Ee][Rr][Nn][Aa][Ll]).*([Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Pp][Rr][Ii][Vv][Ll][Ee][Gg][Ee]|[Rr][Oo0][Oo0][Tt])/
+		# this general interface form has become really common.  Thanks!
+		| /(printf|print|fprintf|echo)[[:blank:]].*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]].*\]/
+		# second half of above generalization.  Seriously, I really appreciate the standardization of interfaces!
+		| /[[:blank:]]*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]]*\]([Aa][Bb][Uu][Ss][Ii][Nn][Gg]|[Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Cc][Ll][Ee][Aa][Nn][Ii][Nn][Gg]|[Ee][Xx][Ie][Cc][Uu][Tt][Ii][Nn][Gg]|[Ff][Aa][Ii][Ll][Ee][Dd]|[Ll][Aa][Uu][Nn][Cc][Hh][Ii][Mn][Gg]|[Ll][Ii][Nn][Uu][Xx]|[Pp][Aa][Rr][Aa][Mm][Ee][Tt][Ee][Rr]|[Ss][Yy][Mm][Bb][Oo][Ll]|[Pp][Rr][Ii]Vv]|[Tt][Rr][Ii][Gg][Gg][Ee][Rr]|[Tt][O0o][O0o][Ll])/
+		# words words words, probably too noisy
+		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]|[Pp][A@][Yy][Ll1][Oo0][Aa@][Dd]|[Ee][Xx][Pp][Ll1][Oo0][Ii][Tt]/
+		# words that I do not commonly find in scientific or benchmark code ...
+		| /[Kk]3[Rr][Nn]3[Ll]|[Rr]3[Ll]3[Aa][Ss$]3|[Mm]3[Tt][Hh]34[Dd]|[Ll][Oo0][Oo0][Kk]1[Nn][Gg]|[Tt]4[Rr][Gg]3[Tt][Zz]|[Cc]0[Mm][Pp][Uu][Tt]3[Rr]|[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0][Dd][Ee3]|[Bb][Ii1][Tt][Cc][Hh][Ee3][ZzSs$]/
+		# bit of a catch all
+		| /\[[-\/|]\]/
 	&redef;
 
 	# this set of commands should be alarmed on when executed
@@ -114,21 +126,10 @@ export {
 		| /open\(\"\/proc\/ksyms\", \"r\"\)/
 		# somewhat oldschool, but often old is tried before new ....
 		| /open\(\"\/dev\/(mem|kmem|oldmem|shmem)/
-		# it is quite handy that code writers tell us what they are doing ..
-		| /[Ll][Ii][Nn][Uu][Xx][[:blank:]]*([Ll][Oo0][Cc][Aa][Ll]|[Kk][Ee][Rr][Nn][Aa][Ll]).*([Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Pp][Rr][Ii][Vv][Ll][Ee][Gg][Ee]|[Rr][Oo0][Oo0][Tt])/
 		# the old self-re-exec ...
 		| /execl\(\"\/proc\/self\/exe\"/
-		# this general interface form has become really common.  Thanks!
-		| /(printf|print|fprintf|echo)[[:blank:]].*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]].*\]/
-		# second half of above generalization.  Seriously, I really appreciate the standardization of interfaces!
-		| /[[:blank:]]*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]]*\]([Aa][Bb][Uu][Ss][Ii][Nn][Gg]|[Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Cc][Ll][Ee][Aa][Nn][Ii][Nn][Gg]|[Ee][Xx][Ie][Cc][Uu][Tt][Ii][Nn][Gg]|[Ff][Aa][Ii][Ll][Ee][Dd]|[Ll][Aa][Uu][Nn][Cc][Hh][Ii][Mn][Gg]|[Ll][Ii][Nn][Uu][Xx]|[Pp][Aa][Rr][Aa][Mm][Ee][Tt][Ee][Rr]|[Ss][Yy][Mm][Bb][Oo][Ll]|[Pp][Rr][Ii]Vv]|[Tt][Rr][Ii][Gg][Gg][Ee][Rr]|[Tt][O0o][O0o][Ll])/
-		# words words words, probably too noisy
-		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]|[Pp][A@][Yy][Ll1][Oo0][Aa@][Dd]|[Ee][Xx][Pp][Ll1][Oo0][Ii][Tt]/
 		# common more last year
 		| /selinux_ops|dummy_security_ops|capability_ops/
-		# words that I do not commonly find in scientific or benchmark code ...
-		| /[Kk]3[Rr][Nn]3[Ll]|[Rr]3[Ll]3[Aa][Ss$]3|[Mm]3[Tt][Hh]34[Dd]|[Ll][Oo0][Oo0][Kk]1[Nn][Gg]|[Tt]4[Rr][Gg]3[Tt][Zz]|[Cc]0[Mm][Pp][Uu][Tt]3[Rr]|[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0][Dd][Ee3]|[Bb][Ii1][Tt][Cc][Hh][Ee3][ZzSs$]/
-
 	&redef;
 
 	const output_trouble =
@@ -144,14 +145,8 @@ export {
 		| /execl\(\"\/bin\/sh\"\, \"\/bin\/sh\", NULL\)/
 		| /open\(\"\/proc\/ksyms\", \"r\"\)/
 		| /open\(\"\/dev\/(mem|kmem|oldmem|shmem)/
-		| /[Ll][Ii][Nn][Uu][Xx][[:blank:]]*([Ll][Oo0][Cc][Aa][Ll]|[Kk][Ee][Rr][Nn][Aa][Ll]).*([Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Pp][Rr][Ii][Vv][Ll][Ee][Gg][Ee]|[Rr][Oo0][Oo0][Tt])/
 		| /execl\(\"\/proc\/self\/exe\"/
-		| /(printf|print|fprintf|echo)[[:blank:]].*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]].*\]/
-		| /[[:blank:]]*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]]*\]([Aa][Bb][Uu][Ss][Ii][Nn][Gg]|[Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Cc][Ll][Ee][Aa][Nn][Ii][Nn][Gg]|[Ee][Xx][Ie][Cc][Uu][Tt][Ii][Nn][Gg]|[Ff][Aa][Ii][Ll][Ee][Dd]|[Ll][Aa][Uu][Nn][Cc][Hh][Ii][Mn][Gg]|[Ll][Ii][Nn][Uu][Xx]|[Pp][Aa][Rr][Aa][Mm][Ee][Tt][Ee][Rr]|[Ss][Yy][Mm][Bb][Oo][Ll]|[Pp][Rr][Ii]Vv]|[Tt][Rr][Ii][Gg][Gg][Ee][Rr]|[Tt][O0o][O0o][Ll])/
-		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]|[Pp][Aa@][Yy][Ll1][Oo0][Aa@][Dd]|[Ee][Xx][Pp][Ll1][Oo0][Ii][Tt]/
 		| /selinux_ops|dummy_security_ops|capability_ops/
-		| /[Kk]3[Rr][Nn]3[Ll]|[Rr]3[Ll]3[Aa][Ss$]3|[Mm]3[Tt][Hh]34[Dd]|[Ll][Oo0][Oo0][Kk]1[Nn][Gg]|[Tt]4[Rr][Gg]3[Tt][Zz]|[Cc]0[Mm][Pp][Uu][Tt]3[Rr]|[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0][Dd][Ee3]|[Bb][Ii1][Tt][Cc][Hh][Ee3][ZzSs$]/
-
 	&redef;
 
 	# lists of regular expressions which might trigger the hostile detect, but 
@@ -218,7 +213,7 @@ function parse_line(data: string, t: count) : set[string]
 					split_on_space[space_element] !in return_set) {
 
 		 			add return_set[ split_on_space[space_element] ];
-					#print fmt("seen hostile command: %s", split_on_space[space_element]);
+					#print fmt("seen LINE_SUSPICOUS command: %s", split_on_space[space_element]);
 				}
 			} # end LINE_SUSPICOUS
 
@@ -229,7 +224,7 @@ function parse_line(data: string, t: count) : set[string]
 					(input_trouble_whitelist !in split_on_sc[sc_element]) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
-					#print fmt("seen hostile command: %s", split_on_space[space_element]);
+					#print fmt("seen hostile LINE_CLIENT command: %s", split_on_space[space_element]);
 				}
 			} # end LINE_CLIENT
 
@@ -240,7 +235,7 @@ function parse_line(data: string, t: count) : set[string]
 					(output_trouble_whitelist !in split_on_sc[sc_element]) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
-					#print fmt("seen hostile command: %s", split_on_space[space_element]);
+					#print fmt("seen hostile LINE_SERVER command: %s", split_on_space[space_element]);
 				}
 			} # end LINE_SERVER
 
