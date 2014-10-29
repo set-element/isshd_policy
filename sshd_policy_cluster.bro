@@ -75,7 +75,7 @@ export {
 	# suspicous commands 
 	global notify_suspicous_command = T &redef;
 
-	global suspicous_threshold: count = 2 &redef;
+	global suspicous_threshold: count = 5 &redef;
 	global suspicous_command_list = 
 		/^who/
 		| /^rpcinfo/
@@ -101,9 +101,11 @@ export {
 		| /bash -i/
 	&redef;
 
-	const user_white_list =
-		/^billybob$/
-	&redef;
+	# this set of commands make the pager go off less for
+	#   false +'s
+	global alarm_remote_exec_whitelist: pattern &redef;
+
+	const user_white_list: pattern &redef;
 
 	# Data formally from login.bro - this has been imported as a basic set with
 	#  additional notes put in the local instance init file.  
@@ -151,11 +153,10 @@ export {
 
 	# lists of regular expressions which might trigger the hostile detect, but 
 	#   are actually benign from this context.
-	const input_trouble_whitelist  = /XXX/ &redef;
-
-	const output_trouble_whitelist = /XXX/ &redef;
+	const input_trouble_whitelist: pattern &redef;
+	const output_trouble_whitelist: pattern &redef;
 		
-
+	# data in the form of aa:bb:cc:dd:ee:ff:gg:hh:ii:jj:kk:ll:mm:nn:oo:pp
 	global bad_key_list: set[string] &redef;
 
 } # end export
@@ -175,7 +176,7 @@ export {
 #  data structs and tables
 ######################################################################################
 # 
-# This section has been cleaned up and pointed at the core code to avoid synching issues
+# This section has been moved to core to avoid synching issues
 #
 
 #########################################################################################
@@ -317,17 +318,20 @@ function test_remote_exec(data: string, CR: SSHD_CORE::client_record, sid:string
 	local ret= 0; # default return value
 
 	if ( alarm_remote_exec in data ) {
-	
-		#
-		NOTICE([$note=SSHD_RemoteExecHostile,
-		$msg=fmt("%s - %s %s %s @ %s -> %s:%s command: %s",
-		CR$log_id, sid, cid, CR$uid, 
-		CR$id$orig_h, CR$id$resp_h, 
-		CR$id$resp_p, data)]);
+
+		# ... these are not the androids that you are looking for ...
+		if ( alarm_remote_exec_whitelist !in data ) {	
+			#
+			NOTICE([$note=SSHD_RemoteExecHostile,
+			$msg=fmt("%s - %s %s %s @ %s -> %s:%s command: %s",
+			CR$log_id, sid, cid, CR$uid, 
+			CR$id$orig_h, CR$id$resp_h, 
+			CR$id$resp_p, data)]);
 			
-		ret = 1;
+			ret = 1;
+			}
 		}
-		
+
 	return ret;
 	}
 
