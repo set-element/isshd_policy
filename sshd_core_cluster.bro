@@ -111,7 +111,7 @@ export {
 	global sshd_auditor: table[string] of count;
 
 	# table holding data relevant to logging info
-	global s_logging: table[string] of Info;
+	global s_logging: table[string] of Info &write_expire=6 hr;
 
 	# functions for testing client and server records
 	global test_sid: function(sid: string) : server_record;
@@ -1081,6 +1081,9 @@ event sshd_connection_end_3(ts: time, version: string, sid: string, cid: count, 
 
 	local s_data = fmt("%s:%s -> %s:%s", r_addr, r_port, l_addr, l_port);
 	log_session_update_event(CR, ts, "SSHD_CONNECTION_END_3", s_data);
+
+	# clean up the connection data
+	remove_cid(sid, cid);
 }
 
 event sshd_connection_start_3(ts: time, version: string, sid: string, cid: count, int_list: string, r_addr: addr, r_port: port, l_addr: addr, l_port: port, i: count)
