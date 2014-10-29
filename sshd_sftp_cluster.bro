@@ -19,7 +19,7 @@ event sftp_process_close(ts:time, sid:string, cid:count, id: int, handle:int)
 	t_Info$data = fmt("%s handle: %s", id, handle);
 
 	SFTP_AUDIT::print_sftp_record(t_Info);
-	SFTP_AUDIT::delete_irecord(CR);
+	SFTP_AUDIT::update_irecord(CR, t_Info);
 	}
 	
 event sftp_process_do_stat(ts:time, sid:string, version: string, cid:count, data:string)
