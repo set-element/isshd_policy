@@ -59,6 +59,7 @@ export {
 	# track input rate ( events/input_test_interval)
 	global input_count: count = 1 &redef;
 	global input_count_prev: count = 1 &redef;
+	global input_count_delta: count = 0 &redef;
 	#  0=pre-init, 1=ok, 2=in low error
 	global input_count_state: count = 0 &redef;
 
@@ -2617,16 +2618,16 @@ event transaction_rate()
 	# Values for input_count_state:
 	#  0=pre-init, 1=ok, 2=in error
 	# We make the assumption here that the low_water < high_water
-	local delta = input_count - input_count_prev;
-	print fmt("%s Log delta: %s", network_time(),delta);
+	input_count_delta = input_count - input_count_prev;
+	print fmt("%s Log delta: %s", network_time(),input_count_delta);
 
 	# rate is too low - send a notice the first time
-	if (delta <= input_low_water) {
+	if (input_count_delta <= input_low_water) {
 
 		# only send the notice on the first instance 
 		if ( input_count_state != 2 ) {
 			NOTICE([$note=SSHD_INPUT_LowTransactionRate,
-				$msg=fmt("event rate %s per %s", delta, input_test_interval)]);
+				$msg=fmt("event rate %s per %s", input_count_delta, input_test_interval)]);
 
 			input_count_state = 2; # 2: transaction rate	
 			}
@@ -2637,19 +2638,19 @@ event transaction_rate()
 		}
 
 	# rate is too high - send a notice the first time
-	if (delta >= input_high_water) {
+	if (input_count_delta >= input_high_water) {
 
 		# only send the notice on the first instance 
 		if ( input_count_state != 2 ) {
 			NOTICE([$note=SSHD_INPUT_HighTransactionRate,
-				$msg=fmt("event rate %s per %s", delta, input_test_interval)]);
+				$msg=fmt("event rate %s per %s", input_count_delta, input_test_interval)]);
 
 			input_count_state = 2; # 2: transaction rate	
 			}
 		}
 
 	# rate is ok
-	if ( (delta > input_low_water) && (delta < input_high_water) ) {
+	if ( (input_count_delta > input_low_water) && (input_count_delta < input_high_water) ) {
 		input_count_state = 1;
 		}
 
