@@ -54,7 +54,7 @@ export {
 	# this is count per input_test_interval
 	const input_count_test = T &redef;
 	const input_low_water:count = 10 &redef; 
-	const input_high_water:count = 100 &redef; 
+	const input_high_water:count = 20000 &redef; 
 	const input_test_interval:interval = 60 sec &redef;
 	# track input rate ( events/input_test_interval)
 	global input_count: count = 1 &redef;
