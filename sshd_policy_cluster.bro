@@ -81,17 +81,22 @@ export {
 		| /^rpcinfo/
 		| /uname -a/
 		# it is quite handy that code writers tell us what they are doing ..
-		| /[Ll][Ii][Nn][Uu][Xx][[:blank:]]*([Ll][Oo0][Cc][Aa][Ll]|[Kk][Ee][Rr][Nn][Aa][Ll]).*([Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Pp][Rr][Ii][Vv][Ll][Ee][Gg][Ee]|[Rr][Oo0][Oo0][Tt])/
+		| /[Ll][Ii][Nn][Uu][Xx][[:blank:]]*([Ll][Oo0][Cc][Aa][Ll]|[Kk][Ee][Rr][Nn][Aa][Ll]).*([Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Pp][Rr][Ii][Vv][Ll][Ee][Gg][Ee])/
 		# this general interface form has become really common.  Thanks!
-		| /(printf|print|fprintf|echo)[[:blank:]].*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]].*\]/
+		#| /(printf|print|fprintf|echo)[[:blank:]].*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]].*\]/
 		# second half of above generalization.  Seriously, I really appreciate the standardization of interfaces!
-		| /[[:blank:]]*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]]*\]([Aa][Bb][Uu][Ss][Ii][Nn][Gg]|[Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Cc][Ll][Ee][Aa][Nn][Ii][Nn][Gg]|[Ee][Xx][Ie][Cc][Uu][Tt][Ii][Nn][Gg]|[Ff][Aa][Ii][Ll][Ee][Dd]|[Ll][Aa][Uu][Nn][Cc][Hh][Ii][Mn][Gg]|[Ll][Ii][Nn][Uu][Xx]|[Pp][Aa][Rr][Aa][Mm][Ee][Tt][Ee][Rr]|[Ss][Yy][Mm][Bb][Oo][Ll]|[Pp][Rr][Ii]Vv]|[Tt][Rr][Ii][Gg][Gg][Ee][Rr]|[Tt][O0o][O0o][Ll])/
+		#| /[[:blank:]]*\[(\-|\+|\*|[Xx]|[:blank:]|!)[[:blank:]]*\]|[Aa][Bb][Uu][Ss][Ii][Nn][Gg]/
+		| /[Aa][Bb][Uu][Ss][Ii][Nn][Gg]|[Pp][Tt][Rr][Aa][Cc][Ee]/
+		#| /|[Ll][Aa][Uu][Nn][Cc][Hh][Ii][Mn][Gg]|[Ss][Yy][Mm][Bb][Oo][Ll]|[Pp][Rr][Ii]Vv]|[Tt][Rr][Ii][Gg][Gg][Ee][Rr]|[Tt][O0o][O0o][Ll]/
 		# words words words, probably too noisy
-		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]|[Pp][A@][Yy][Ll1][Oo0][Aa@][Dd]|[Ee][Xx][Pp][Ll1][Oo0][Ii][Tt]/
+		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0][Dd][Ee]|[Pp][A@][Yy][Ll1][Oo0][Aa@][Dd]|[Ee][Xx][Pp][Ll1][Oo0][Ii][Tt]/
 		# words that I do not commonly find in scientific or benchmark code ...
 		| /[Kk]3[Rr][Nn]3[Ll]|[Rr]3[Ll]3[Aa][Ss$]3|[Mm]3[Tt][Hh]34[Dd]|[Ll][Oo0][Oo0][Kk]1[Nn][Gg]|[Tt]4[Rr][Gg]3[Tt][Zz]|[Cc]0[Mm][Pp][Uu][Tt]3[Rr]|[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0][Dd][Ee3]|[Bb][Ii1][Tt][Cc][Hh][Ee3][ZzSs$]/
-		# bit of a catch all
-		| /\[[-\/|]\]/
+		# bit of a catch all re the generic interface construct [+]/[-] ...
+		#  first case when the IC is the first character set in the line
+		#| /^.{0,8}\[[-\/|]\]/
+		#  then we look for space *after* the [x] grouping
+		| /^.{0,8}\[[-\/|+]\]/
 	&redef;
 
 	# this set of commands should be alarmed on when executed
@@ -101,11 +106,9 @@ export {
 		| /bash -i/
 	&redef;
 
-	# this set of commands make the pager go off less for
-	#   false +'s
 	global alarm_remote_exec_whitelist: pattern &redef;
 
-	const user_white_list: pattern &redef;
+	global user_white_list: pattern &redef;
 
 	# Data formally from login.bro - this has been imported as a basic set with
 	#  additional notes put in the local instance init file.  
@@ -132,12 +135,14 @@ export {
 		| /execl\(\"\/proc\/self\/exe\"/
 		# common more last year
 		| /selinux_ops|dummy_security_ops|capability_ops/
+		| /[Sh][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]/
 	&redef;
 
 	const output_trouble =
 		  /^-r.s.*root.*\/bin\/(sh|csh|tcsh)/
 		| /Jumping to address/
 		| /(shell|xploit)_code/
+		| /(shell|xploit)code/
 		| /execshell/
 		| /BOT_VERSION/
 		| /(cd \/; uname -a; pwd; id)/
@@ -149,13 +154,14 @@ export {
 		| /open\(\"\/dev\/(mem|kmem|oldmem|shmem)/
 		| /execl\(\"\/proc\/self\/exe\"/
 		| /selinux_ops|dummy_security_ops|capability_ops/
+		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]/
 	&redef;
 
 	# lists of regular expressions which might trigger the hostile detect, but 
 	#   are actually benign from this context.
 	const input_trouble_whitelist: pattern &redef;
 	const output_trouble_whitelist: pattern &redef;
-		
+	# 
 	# data in the form of aa:bb:cc:dd:ee:ff:gg:hh:ii:jj:kk:ll:mm:nn:oo:pp
 	global bad_key_list: set[string] &redef;
 
@@ -214,7 +220,7 @@ function parse_line(data: string, t: count) : set[string]
 					split_on_space[space_element] !in return_set) {
 
 		 			add return_set[ split_on_space[space_element] ];
-					#print fmt("seen LINE_SUSPICOUS command: %s", split_on_space[space_element]);
+					print fmt("seen LINE_SUSPICOUS command: %s", split_on_space[space_element]);
 				}
 			} # end LINE_SUSPICOUS
 
@@ -225,7 +231,7 @@ function parse_line(data: string, t: count) : set[string]
 					(input_trouble_whitelist !in split_on_sc[sc_element]) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
-					#print fmt("seen hostile LINE_CLIENT command: %s", split_on_space[space_element]);
+					print fmt("seen hostile LINE_CLIENT command: %s", split_on_space[space_element]);
 				}
 			} # end LINE_CLIENT
 
@@ -236,7 +242,7 @@ function parse_line(data: string, t: count) : set[string]
 					(output_trouble_whitelist !in split_on_sc[sc_element]) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
-					#print fmt("seen hostile LINE_SERVER command: %s", split_on_space[space_element]);
+					print fmt("seen hostile LINE_SERVER command: %s", split_on_space[space_element]);
 				}
 			} # end LINE_SERVER
 
@@ -254,11 +260,11 @@ function test_suspicous(data:string, CR: SSHD_CORE::client_record, channel:count
 	#   values before analysis so that byte values can be test against.  
 
 	local ret= 0; # default return value
-
 	# first look at the entire string to see if it conains any of the 
 	#  suspicous expressions
 	if ( suspicous_command_list in data ) {
-	
+
+		print fmt("SUS COMM LINE: %s", data);	
 		# Now that we know that a value exists that we are intereted in,
 		#  spend the additional effort to determine the value.
 		# Note that there might be more than one value per line
@@ -331,7 +337,7 @@ function test_remote_exec(data: string, CR: SSHD_CORE::client_record, sid:string
 			ret = 1;
 			}
 		}
-
+		
 	return ret;
 	}
 
