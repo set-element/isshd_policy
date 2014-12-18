@@ -54,7 +54,7 @@ export {
 	# this is count per input_test_interval
 	const input_count_test = T &redef;
 	const input_low_water:count = 10 &redef; 
-	const input_high_water:count = 20000 &redef; 
+	const input_high_water:count = 10000 &redef; 
 	const input_test_interval:interval = 60 sec &redef;
 	# track input rate ( events/input_test_interval)
 	global input_count: count = 1 &redef;
@@ -2521,12 +2521,17 @@ redef argument_count += {
 
 event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineVals)
 	{
-
 	local t_d = gsub(LV$d, /\x20\x20/, " ");	
 	LV$d = t_d;
         local parts = split(LV$d, kv_splitter);
 	local l_parts = |parts|;
 	local ni: count = 2;
+
+	local sticky_test: pattern = /auth_info_3|auth_invalid_user_3|auth_key_fingerprint_3|auth_ok auth_ok_2|auth_pass_attempt_3/
+		| /channel_data_client_3|channel_data_server_3|channel_data_server_sum_3|channel_exit|channel_exit_2|channel_free_3|channel_new_3|channel_notty_analysis_disable_3|channel_notty_client_data_3|channel_notty_server_data_3|channel_pass_skip_3|channel_portfwd_req_3|channel_port_open_3|channel_post_fwd_listener_3|channel_set_fwd_listener_3|channel_socks4_3|channel_socks5_3/
+		| /data_client|data_client_2|data_server|data_server_2|data_server_sum|data_server_sum_2/
+		| /session_channel_request_3|session_do_auth_3|session_exit_3|session_input_channel_open_3|session_new_3|session_remote_do_exec_3|session_remote_exec_no_pty_3|session_remote_exec_pty_3|session_request_direct_tcpip_3|session_tun_init_3|session_x11fwd_3/
+		| /sshd_connection_end_3|sshd_connection_start_3|sshd_exit_3|sshd_key_fingerprint|sshd_key_fingerprint_2|sshd_restart_3|sshd_server_heartbeat_3|sshd_start_3/;
 
 	# count the transaction record
 	++input_count;
@@ -2537,8 +2542,9 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 	# there is no reason for this value to be this low for a legitimate line
 	if ( l_parts < 5 )
 		return;
-	
+
 	if ( event_name in dispatcher ) {
+	
 		if ( event_name in argument_count ) {
 			local arg_set = argument_count[event_name];
 			local i: count;
@@ -2549,50 +2555,72 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 					}
 				}
 
-			# this is a bit arbitrary for now
-			if ( l_parts > 10 ) {
+			# If we get to this place, the initial event identification is correct - 
+			#   that is it is in the dispatcher list, but there is something wrong 
+			#   with the argument checker.  This block of code will attempt to 
+			#   disect the blob of text, parsing it based on the set of known event
+			#   names, and rebuilding the various bits as it can.
+			#
+			# Kinda ugly, but if we are here the data is already assumed to be messed 
+			#   up , so anything  >> nothing...
 
-				local m_event = split_all(t_d, multi_match);
-				local j:count;
-				local n:count;
+			local v12: vector of count = vector(1,2,3,4,5,6,7,8,9,10,11,12);
+			local st1 = split_n(LV$d, sticky_test,T,20);
+			local ret_data = "X";
+			local v: count;
 
-				# we know that there will be at least one of these ..
-				# the general form is [1]: skip, [2][3] , [4][5] , ...
-				for ( j in v2s ) {
-					n = v2s[j];
+			for ( v in v12 ) {
+				if ( v < |st1| ) {
 
-					if ( n+1 <= |m_event| ) {
-						local t_data: string = fmt("%s%s", m_event[n], m_event[n+1]);
-						local t_event: string = strip(fmt("%s",m_event[n]));
-						LV$d = t_data;
-						dispatcher[t_event](LV$d);
+					# first chop up the line - if part [1] is in dispatcher
+					#   then we can start gluing bits back together
+					local t_test = split(st1[ v12[v] ], kv_splitter);
+
+					if ( t_test[1] in dispatcher ) {
+						if ( ret_data == "X" ) {
+							# first time through...
+							ret_data = fmt("%s", st1[ v12[v] ]);
+							}
+						else {
+							# the current ret_val should contain a well formed event + args
+							# we now pedantically test it to make sure that it is well formed
+							local ttest = split(ret_data, kv_splitter);	
+							local ename = ttest[1];
+							#print fmt("     TRY: %s %s", ename, |ttest|);
+							if ( ename in dispatcher ) {
+								local aset = argument_count[ename];
+								local x: count;
+								for ( x in aset ) {
+									if ( |ttest| == aset[x] ) {
+										LV$d = ret_data;
+										# flush old value to event handler
+										event sshLine(description, tpe, LV);
+										#print fmt("     FIX %s", ename);
+										}
+									} # end for
+								}
+							else {
+								# This is a stub for accounting
+								} # end dispatch test
+
+							ret_data = st1[ v12[v] ];
+							}
 						}
-					}
-				} # end main multipart outer loop
-			} # end of event_name in dispatcher
-		else {
-			#print fmt("NOT IN ARG-COUNT: %s", event_name);
+					else {
+						# t_test[1] not in dispatcher - if not empty, append
+						if ( |st1[ v12[v] ]| > 1 ) {
+							ret_data = fmt("%s%s", ret_data, st1[ v12[v] ]);
+							}
+						else {
+							# another accounting stub
+							}
+						} # end dispatch test else
+							
+					} # |st1| test
+				} # end for-v loop
 			}
 		}
-	else {
 
-		# since a significant number of "unknown" errors are just
-		#  off by one give parts[2] a try
-		if ( parts[2] in dispatcher ) {
-
-			local parts_mod = split1(LV$d, kv_splitter);
-			# call the function with the identified name: parts[2]
-			# using the snipped off data: parts_mod[2] which contains the original 
-			#  data string with the initial member snipped off
-			dispatcher[ parts[2] ](parts_mod[2]);
-			}
-		else {
-			if ( notify_unknown_event ) {
-				NOTICE([$note=SSHD_INPUT_UnknownEvent,
-					$msg=fmt("Unknown event %s", event_name)]);
-				}
-			}	
-		}
 	}
 
 event stop_reader()
@@ -2618,8 +2646,10 @@ event transaction_rate()
 	# Values for input_count_state:
 	#  0=pre-init, 1=ok, 2=in error
 	# We make the assumption here that the low_water < high_water
+	# Use a global for input_count_delta so that the value is consistent across
+	#   anybody looking at it.
 	input_count_delta = input_count - input_count_prev;
-	print fmt("%s Log delta: %s", network_time(),input_count_delta);
+	#print fmt("%s Log delta: %s", network_time(),delta);
 
 	# rate is too low - send a notice the first time
 	if (input_count_delta <= input_low_water) {
