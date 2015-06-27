@@ -1,5 +1,20 @@
 
-redef SSHD_POLICY::bad_key_list = {
+
+redef SSHD_POLICY::bad_key_list += {
+# keys from https://github.com/rapid7/ssh-badkeys
+# ssh-keygen -lf X.pub
+#
+# authorized
+"04:9b:f5:de:de:27:10:5a:b8:8d:ab:79:cd:17:e8:57", # array-networks-vapv-vxag.pub (DSA 1024)
+"27:c6:ad:f9:a6:4d:22:3f:18:b0:3b:df:81:1c:57:45", # ceragon-fibeair-cve-2015-0936. mateidu@localhost (RSA 1024)
+"f0:96:10:b7:d6:38:38:de:f4:b4:d2:df:5e:f8:2d:74", # loadbalancer.org-enterprise-va root@lbslave (DSA)
+"e4:4d:3e:11:db:3f:06:be:31:40:d8:fe:03:8e:46:8b", # quantum-dxi-v1000 (DSA 1024)
+"dd:3b:b8:2e:85:04:06:e9:ab:ff:a8:0a:c0:04:6e:d6", # vagrant insecure public key (RSA 2048)
+# host
+"49:53:bf:94:2a:d7:0c:3f:48:29:f7:5b:5d:de:89:b8", # tandberg-vcs, hgb@hgbpc (DSA 1024)
+};
+
+redef SSHD_POLICY::bad_key_list += {
 "00:1b:b7:4c:04:a9:fc:90:c8:74:15:27:74:65:79:70",
 "00:1e:0d:9d:ed:23:5e:7f:6f:11:35:1e:0b:8f:bb:d6",
 "00:20:bc:e9:55:e4:e0:80:ce:15:f5:1c:ec:e6:6b:83",
