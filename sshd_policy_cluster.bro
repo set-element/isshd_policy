@@ -205,11 +205,11 @@ function parse_line(data: string, t: count) : set[string]
 	local space_element: count;
 
 	# look for multiple comands separated by ';' since a;b;c will have no strings
-	local split_on_sc = split(data, /;/);
+	local split_on_sc = split_string(data, /;/);
 
 	for ( sc_element in split_on_sc ) {
 		# now split ; separated commands up on space
-		local split_on_space = split(split_on_sc[sc_element], / /);
+		local split_on_space = split_string(split_on_sc[sc_element], / /);
 
 		for ( space_element in split_on_space ) {
 
