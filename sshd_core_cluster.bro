@@ -353,18 +353,18 @@ function print_sid(sid: string) : string
 	{
 	# sid is of the form "hostname hostid port"
 	local ret_val = "00000";
-	local split_on_space = split(sid, /:/);
+	local split_on_space = split_string(sid, /:/);
 
 	if ( |split_on_space| > 1 )
-		ret_val = split_on_space[2];
+		ret_val = split_on_space[1];
 	else {
 		# It might be the case that the sid is of the form 
 		#  5173_cvrsvc01_22 in which case we must snip on a
 		#  different value ...
-		local split_on_score = split(sid, /_/);
+		local split_on_score = split_string(sid, /_/);
 	
 		if ( |split_on_score| > 1 )
-			ret_val = split_on_score[2];
+			ret_val = split_on_score[1];
 		}
 
 	return ret_val;
@@ -387,8 +387,8 @@ function print_channel(CR: client_record, channel: count) : string
 function lookup_cid(sid: string, ppid: int) : count
 	{
 	local ret: count = 0;
-	local split_cln = split(sid, /:/);
-	local t_sid = fmt("%s:%s", split_cln[2], split_cln[3]);
+	local split_cln = split_string(sid, /:/);
+	local t_sid = fmt("%s:%s", split_cln[1], split_cln[2]);
 
 	if ( [t_sid,ppid] in cid_lookup ) {
 		ret = cid_lookup[t_sid,ppid];
@@ -400,8 +400,8 @@ function lookup_cid(sid: string, ppid: int) : count
 function register_cid(sid: string, cid: count, ppid: int) : count
 	{
 	local ret: count = 0;
-	local split_cln = split(sid, /:/);
-	local t_sid = fmt("%s:%s", split_cln[2], split_cln[3]);
+	local split_cln = split_string(sid, /:/);
+	local t_sid = fmt("%s:%s", split_cln[1], split_cln[2]);
 
 	if ( [t_sid,ppid] !in cid_lookup ) {
 		cid_lookup[t_sid,ppid] = cid;
@@ -908,8 +908,8 @@ event session_channel_request_3(ts: time, version: string, sid: string, cid: cou
 		# If there is a value in place we run it over - it should have been cleaned up
 		#  in the session_exit event...
 
-        	local split_cln = split(sid, /:/);
-        	local t_sid = fmt("%s:%s", split_cln[2], split_cln[3]);
+        	local split_cln = split_string(sid, /:/);
+        	local t_sid = fmt("%s:%s", split_cln[1], split_cln[2]);
 
 		cid_lookup[t_sid, pid] = cid;
 	}
@@ -950,8 +950,8 @@ event session_exit_3(ts: time, version: string, sid: string, cid: count, channel
 	local CR:client_record = test_cid(sid,cid);
 
 	# on session exit, remove the entry asosciated with the subsystem
-        local split_cln = split(sid, /:/);
-        local t_sid = fmt("%s:%s", split_cln[2], split_cln[3]);
+        local split_cln = split_string(sid, /:/);
+        local t_sid = fmt("%s:%s", split_cln[1], split_cln[2]);
 	
 	if ( [t_sid,pid] in cid_lookup ) {
 		delete cid_lookup[t_sid, pid];
@@ -998,8 +998,8 @@ event session_new_3(ts: time, version: string, sid: string, cid: count, pid: int
 	# If there is a value in place we run it over - it should have been cleaned up
 	#  in the session_exit event...
 
-        #local split_cln = split(sid, /:/);
-        #local t_sid = fmt("%s:%s", split_cln[2], split_cln[3]);
+        #local split_cln = split_string(sid, /:/);
+        #local t_sid = fmt("%s:%s", split_cln[1], split_cln[2]);
 	#
 	#cid_lookup[t_sid, pid] = cid;
 }
