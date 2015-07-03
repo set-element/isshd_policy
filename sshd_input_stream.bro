@@ -79,15 +79,15 @@ redef InputAscii::empty_field = "EMPTY";
 function ssh_time(s: string) : time
 	{
 	# default return value is 0.00000 which is the error token
-	local key_val = split1(s, /=/);
+	local key_val = split_string1(s, /=/);
 	local ret_val: time = double_to_time( to_double("0.000000"));
 
 	if ( |key_val| == 2 ) {
 
-		local mpr = match_pattern( key_val[2], time_match);
+		local mpr = match_pattern( key_val[1], time_match);
 
 		if ( mpr$matched )
-			ret_val = double_to_time( to_double(key_val[2] ));
+			ret_val = double_to_time( to_double(key_val[1] ));
 
 		}
 
@@ -98,11 +98,11 @@ function ssh_string(s: string) : string
 	{
 	# substitute '+' with a space
 	local sub_s = subst_string( s, "+", " ");
-	local key_val = split1(sub_s, /=/);
+	local key_val = split_string1(sub_s, /=/);
 	local ret_str: string = " ";
 
 	if ( |key_val| == 2 ) {
-		ret_str = raw_unescape_URI( key_val[2] );
+		ret_str = raw_unescape_URI( key_val[1] );
 		# remove backspace characters
 		ret_str = edit(ret_str, "\x08");
 		ret_str = edit(ret_str, "\x7f");
@@ -122,18 +122,18 @@ function ssh_string(s: string) : string
 
 function ssh_count(s: string) : count
 	{
-	local key_val = split1(s, /=/);
+	local key_val = split_string1(s, /=/);
 	local ret_val: count = 0;
 
 	if ( |key_val| == 2 ) {
 
-		local t_count = key_val[2];
+		local t_count = key_val[1];
 		local mpr = match_pattern( t_count, count_match);
 
 		if ( mpr$matched )
 			ret_val =  to_count( t_count );
 		else {
-			#print fmt("COUNT PATTERN ERROR: %s", key_val[2]);
+			#print fmt("COUNT PATTERN ERROR: %s", key_val[1]);
 			}
 		}
 
@@ -142,23 +142,23 @@ function ssh_count(s: string) : count
 
 function ssh_addr(s: string) : addr
 	{
-	local key_val = split1(s, /=/);
+	local key_val = split_string1(s, /=/);
 	local ret_val:addr = to_addr( "127.5.5.5");
 
 	if ( |key_val| == 2 )
-		ret_val = to_addr( key_val[2] );
+		ret_val = to_addr( key_val[1] );
 
 	return ret_val;
 	}
 
 function ssh_port(s: string) : port
 	{
-	local key_val = split1(s, /=/);
+	local key_val = split_string1(s, /=/);
 	local ret_val = to_port("10/tcp");
 
 	if ( |key_val| == 2 ) {
 		# test to see if the "value" component is missing the protocol string
-		local t_port = key_val[2];
+		local t_port = key_val[1];
 		local p_pm = match_pattern( t_port, port_match );
 
 		if ( p_pm$matched ) {
@@ -179,11 +179,11 @@ function ssh_port(s: string) : port
 
 function ssh_int(s: string) : int
 	{
-	local key_val = split1(s, /=/);
+	local key_val = split_string1(s, /=/);
 	local ret_val:int = 0;
 
 	if ( |key_val| == 2 )
-		ret_val = to_int(key_val[2]);
+		ret_val = to_int(key_val[1]);
 
 	return ret_val;
 	}
@@ -191,10 +191,10 @@ function ssh_int(s: string) : int
 function dump_line_data(_data: string) : count
 	{
 	local ret = 0;
-        local parts = split(_data, kv_splitter);
+        local parts = string_split(_data, kv_splitter);
 	local l_parts = |parts|;
 	local ni: count = 2;
-	local event_name = parts[1];
+	local event_name = parts[0];
 
 	# run through the arguments
 	for ( ni in v16 ) {
@@ -202,9 +202,9 @@ function dump_line_data(_data: string) : count
 			# convert to count
 			local n = int_to_count(ni);
 			# split type=value
-			local key_val = split1(parts[n], /=/);
+			local key_val = split_string1(parts[n], /=/);
 			#
-			#print fmt("%s %s %s %s", n, parts[n], key_val[1], key_val[2]);
+			#print fmt("%s %s %s %s", n, parts[n], key_val[1], key_val[1]);
 			}
 		}
 
@@ -214,19 +214,19 @@ function dump_line_data(_data: string) : count
 function _auth_info_3(_data: string) : count
 	{
 	# event auth_info_3(ts: time, version: string, sid: string, cid: count, authmsg: string, uid: string, meth: string, s_addr: addr, s_port: port, r_addr: addr, r_port: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local authmsg = ssh_string( parts[6] );
-	local uid = ssh_string( parts[7] );
-	local meth = ssh_string ( parts[8] );
-	local s_addr = ssh_addr( parts[9] );
-	local s_port = ssh_port( parts[10] );
-	local r_addr = ssh_addr( parts[11] );
-	local r_port = ssh_port( parts[12] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local authmsg = ssh_string( parts[5] );
+	local uid = ssh_string( parts[6] );
+	local meth = ssh_string ( parts[7] );
+	local s_addr = ssh_addr( parts[8] );
+	local s_port = ssh_port( parts[9] );
+	local r_addr = ssh_addr( parts[10] );
+	local r_port = ssh_port( parts[11] );
 
 	event auth_info_3(ts,version,sid,cid,authmsg,uid,meth,s_addr,s_port,r_addr,r_port);
 
@@ -237,14 +237,14 @@ function _sftp_process_readlink_3(_data: string) : count
 	{
 	#event sftp_process_readlink_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string) 
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_readlink_3(ts,version,sid,cid,ppid,d);
 	
@@ -255,14 +255,14 @@ function _sftp_process_readlink_2(_data: string) : count
 	{
 	# event sftp_process_readlink(ts:time, sid:string, cid:count, data:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_readlink(ts,sid,cid,d);
 
@@ -273,14 +273,14 @@ function _sftp_process_readlink(_data: string) : count
 	{
 	# event sftp_process_readlink(ts:time, sid:string, cid:count, data:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_readlink(ts,sid,cid,d);
 
@@ -291,15 +291,15 @@ function _sftp_process_rename(_data: string) : count
 	{
 	# event sftp_process_rename(ts:time, sid:string, cid:count, old_name:string, new_name:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
-	local d2 = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
+	local d2 = ssh_string( parts[7] );
 
 	event sftp_process_rename(ts,sid,cid,d,d2);
 
@@ -310,15 +310,15 @@ function _sftp_process_rename_2(_data: string) : count
 	{
 	# event sftp_process_rename(ts:time, sid:string, cid:count, old_name:string, new_name:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
-	local d2 = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
+	local d2 = ssh_string( parts[7] );
 
 	event sftp_process_rename(ts,sid,cid,d,d2);
 
@@ -329,15 +329,15 @@ function _sftp_process_rename_3(_data: string) : count
 	{
 	# event sftp_process_rename_3(ts:time, version: string, sid:string, cid:count, ppid: int, old_name:string, new_name:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
-	local d2 = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
+	local d2 = ssh_string( parts[7] );
 
 	event sftp_process_rename_3(ts,version,sid,cid,ppid,d,d2);
 
@@ -348,15 +348,15 @@ function _sftp_process_setstat_2(_data: string) : count
 	{
 	# event sftp_process_setstat(ts:time, sid:string, cid:count, data:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local i = ssh_int( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local i = ssh_int( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event sftp_process_setstat(ts,sid,cid,d);
 
@@ -367,15 +367,15 @@ function _sftp_process_setstat_3(_data: string) : count
 	{
 	# event sftp_process_setstat_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local i = ssh_int( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local i = ssh_int( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event sftp_process_setstat_3(ts,version,sid,cid,ppid,d);
 
@@ -385,14 +385,14 @@ function _sftp_process_setstat_3(_data: string) : count
 function _auth_key_fingerprint_3(_data: string) : count
 	{
 	# event auth_key_fingerprint_3(ts: time, version: string, sid: string, cid: count, fingerprint: string, key_type: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local fingerprint = ssh_string( parts[6] );
-	local key_type = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local fingerprint = ssh_string( parts[5] );
+	local key_type = ssh_string( parts[6] );
 
 	event auth_key_fingerprint_3(ts,version,sid,cid,fingerprint,key_type);
 
@@ -402,19 +402,19 @@ function _auth_key_fingerprint_3(_data: string) : count
 function _auth_ok(_data: string) : count
 	{
 	# event auth_ok(ts:time, sid:string, uid:string, authtype:string, s_addr: addr, s_port: port, r_addr: addr, r_port: port, cid: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local uid = ssh_string( parts[6] );
-	local authtype = ssh_string( parts[7] );
-	local s_addr = ssh_addr( parts[8] );
-	local s_port = ssh_port( parts[9] );
-	local r_addr = ssh_addr( parts[10] );
-	local r_port = ssh_port( parts[11] );
-	local cid = ssh_count( parts[12] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local uid = ssh_string( parts[5] );
+	local authtype = ssh_string( parts[6] );
+	local s_addr = ssh_addr( parts[7] );
+	local s_port = ssh_port( parts[8] );
+	local r_addr = ssh_addr( parts[9] );
+	local r_port = ssh_port( parts[10] );
+	local cid = ssh_count( parts[11] );
 
 	event auth_ok_2(ts,version,serv_interfaces,sid,uid,authtype,s_addr,s_port,r_addr,r_port,cid);
 
@@ -424,19 +424,19 @@ function _auth_ok(_data: string) : count
 function _auth_ok_2(_data: string) : count
 	{
 	# event auth_ok_2(ts:time, version: string, serv_interfaces: string, sid:string, uid:string, authtype:string, s_addr: addr, s_port: port, r_addr: addr, r_port: port, cid: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local uid = ssh_string( parts[6] );
-	local authtype = ssh_string( parts[7] );
-	local s_addr = ssh_addr( parts[8] );
-	local s_port = ssh_port( parts[9] );
-	local r_addr = ssh_addr( parts[10] );
-	local r_port = ssh_port( parts[11] );
-	local cid = ssh_count( parts[12] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local uid = ssh_string( parts[5] );
+	local authtype = ssh_string( parts[6] );
+	local s_addr = ssh_addr( parts[7] );
+	local s_port = ssh_port( parts[8] );
+	local r_addr = ssh_addr( parts[9] );
+	local r_port = ssh_port( parts[10] );
+	local cid = ssh_count( parts[11] );
 
 	event auth_ok_2(ts,version,serv_interfaces,sid,uid,authtype,s_addr,s_port,r_addr,r_port,cid);
 	return 0;
@@ -445,14 +445,14 @@ function _auth_ok_2(_data: string) : count
 function _channel_data_client_3(_data: string) : count
 	{
 	# event channel_data_client_3(ts: time, version: string, sid: string, cid: count, channel:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event channel_data_client_3(ts,version,sid,cid,channel,d);
 	return 0;
@@ -461,14 +461,14 @@ function _channel_data_client_3(_data: string) : count
 function _channel_data_server_3(_data: string) : count
 	{
 	# event channel_data_server_3(ts: time, version: string, sid: string, cid: count, channel: count, _data: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event channel_data_server_3(ts,version,sid,cid,channel,d);
 	return 0;
@@ -480,15 +480,15 @@ function _data_server_sum(_data: string) : count
 	# 55.69.224+128.55.33.224+ count=441292721 count=0 count=11123
 	# data_server_sum(ts: time, sid: string, version: string, serv_interfaces: string,cid: count, channel: count, bytes_skip: count)
 	# Q: last set in order ??
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local bytes_skip = ssh_count( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local bytes_skip = ssh_count( parts[7] );
 
 	event data_server_sum(ts,sid,version,serv_interfaces,cid,channel,bytes_skip);
 
@@ -501,15 +501,15 @@ function _data_server_sum_2(_data: string) : count
 	# 55.69.224+128.55.33.224+ count=441292721 count=0 count=11123
 	# data_server_sum(ts: time, sid: string, version: string, serv_interfaces: string,cid: count, channel: count, bytes_skip: count)
 	# Q: last set in order ??
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local bytes_skip = ssh_count( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local bytes_skip = ssh_count( parts[7] );
 
 	event data_server_sum_2(ts,sid,version,serv_interfaces,cid,channel,bytes_skip);
 
@@ -519,14 +519,14 @@ function _data_server_sum_2(_data: string) : count
 function _channel_data_server_sum_3(_data: string) : count
 	{
 	# event channel_data_server_sum_3(ts: time, version: string, sid: string, cid: count, channel: count, bytes_skip: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local bytes_skip = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local bytes_skip = ssh_count( parts[6] );
 
 	event channel_data_server_sum_3(ts,version,sid,cid,channel,bytes_skip);
 	return 0;
@@ -548,14 +548,14 @@ function _channel_exit_2(_data: string) : count
 function _channel_free_3(_data: string) : count
 	{
 	# event channel_free_3(ts: time, version: string, sid: string, cid: count,channel: count, name: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local name = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local name = ssh_string( parts[6] );
 
 	event channel_free_3(ts,version,sid,cid,channel,name);
 
@@ -565,15 +565,15 @@ function _channel_free_3(_data: string) : count
 function _channel_new_3(_data: string) : count
 	{
 	# event channel_new_3(ts: time, version: string, sid: string, cid: count, found: count, ctype: count, name: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local found = ssh_count( parts[6] );
-	local ctype = ssh_count( parts[7] );
-	local name = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local found = ssh_count( parts[5] );
+	local ctype = ssh_count( parts[6] );
+	local name = ssh_string( parts[7] );
 
 	event channel_new_3(ts,version,sid,cid,found,ctype,name);
 
@@ -583,24 +583,24 @@ function _channel_new_3(_data: string) : count
 function _channel_notty_analysis_disable_3(_data: string) : count
 	{
 	# event channel_notty_analysis_disable_3(ts: time, version: string, sid: string, cid: count, channel: count, byte_skip: int, byte_sent: int)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
 	local channel = 0;
 	local byte_skip: int;
 	local byte_sent: int;
 
 	if ( |parts| == 8 ) {
-		channel = ssh_count( parts[6] );
-		byte_skip = ssh_int( parts[7] );
-		byte_sent = ssh_int( parts[8] );
-		}
-	else {
+		channel = ssh_count( parts[5] );
 		byte_skip = ssh_int( parts[6] );
 		byte_sent = ssh_int( parts[7] );
+		}
+	else {
+		byte_skip = ssh_int( parts[5] );
+		byte_sent = ssh_int( parts[6] );
 		}
 		
 	event channel_notty_analysis_disable_3(ts,version,sid,cid,channel,byte_skip,byte_sent);
@@ -611,14 +611,14 @@ function _channel_notty_analysis_disable_3(_data: string) : count
 function _channel_notty_client_data_3(_data: string) : count
 	{
 	# event channel_notty_client_data_3(ts: time, version: string, sid: string, cid: count, channel: count, _data: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event channel_notty_client_data_3(ts,version,sid,cid,channel,d);
 
@@ -628,16 +628,16 @@ function _channel_notty_client_data_3(_data: string) : count
 function _channel_notty_server_data_3(_data: string) : count
 	{
 	# event channel_notty_server_data_3(ts: time, version: string, sid: string, cid: count, channel: count, _data: string)
-	local parts = split(_data, kv_splitter);
+	# channel_notty_server_data_3 time=1435820103.444348 uristring=NMOD_3.08 uristring=537580590%3Amndlnx02%3A22 count=935192037 count=0 uristring=
+	local parts = string_split(_data, kv_splitter);
 	local l_parts = |parts|;
 
-	local event_name = parts[1];
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event channel_notty_server_data_3(ts,version,sid,cid,channel,d);
 	return 0;
@@ -647,15 +647,15 @@ function _data_client(_data: string) : count
 	{
 	# event data_client(ts:time, sid:string, cid:count, channel:count, _data:string)
 	# data_client time=1342000801.342046 uristring=8247_hopper08_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.77.1.9+128.55.68.39+128.55.34.73+10.10.10.207+10.10.30.207+10.10.20.208+ count=627016360 count=0 uristring=p%7Fcd+C%09
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event data_client_2(ts,sid,version,serv_interfaces,cid,channel,d);
 
@@ -665,15 +665,15 @@ function _data_client(_data: string) : count
 function _data_client_2(_data: string) : count
 	{
 	# event data_client_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event data_client_2(ts,version,serv_interfaces,sid,cid,channel,d);
 
@@ -683,15 +683,15 @@ function _data_client_2(_data: string) : count
 function _data_server(_data: string) : count
 	{
 	# event data_server(ts:time, sid:string, cid:count, channel:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event data_server_2(ts,version,serv_interfaces,sid,cid,channel,d);
 
@@ -701,15 +701,15 @@ function _data_server(_data: string) : count
 function _data_server_2(_data: string) : count
 	{
 	# event data_server_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event data_server_2(ts,version,serv_interfaces,sid,cid,channel,d);
 
@@ -730,15 +730,15 @@ function data_server_sum_2(_data: string) : count
 function _new_channel_session(_data: string) : count
 	{
 	# event new_channel_session(ts:time, sid:string, channel:count, channel_type:string, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local channel_type = ssh_string( parts[7] );
-	local cid = ssh_count( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local channel_type = ssh_string( parts[6] );
+	local cid = ssh_count( parts[7] );
 
 	event new_channel_session_2(ts,version,serv_interfaces,sid,channel,channel_type,cid);
 
@@ -748,15 +748,15 @@ function _new_channel_session(_data: string) : count
 function _new_channel_session_2(_data: string) : count
 	{
 	# event new_channel_session_2(ts:time, version: string, serv_interfaces: string, sid:string, channel:count, channel_type:string, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local channel_type = ssh_string( parts[7] );
-	local cid = ssh_count( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local channel_type = ssh_string( parts[6] );
+	local cid = ssh_count( parts[7] );
 
 	event new_channel_session_2(ts,version,serv_interfaces,sid,channel,channel_type,cid);
 
@@ -766,14 +766,14 @@ function _new_channel_session_2(_data: string) : count
 function _new_session(_data: string) : count
 	{
 	# event new_session(ts:time, sid:string, version:string, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local ver = ssh_string( parts[6] );
-	local cid = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local ver = ssh_string( parts[5] );
+	local cid = ssh_count( parts[6] );
 
 	event new_session_2(ts,version,serv_interfaces,sid,ver,cid);
 
@@ -783,14 +783,14 @@ function _new_session(_data: string) : count
 function _new_session_2(_data: string) : count
 	{
 	# event new_session_2(ts:time, version: string, serv_interfaces: string, sid:string, ver:string, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local ver = ssh_string( parts[6] );
-	local cid = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local ver = ssh_string( parts[5] );
+	local cid = ssh_count( parts[6] );
 
 	event new_session_2(ts,version,serv_interfaces,sid,ver,cid);
 
@@ -800,15 +800,15 @@ function _new_session_2(_data: string) : count
 function _notty_analysis_disable(_data: string) : count
 	{
 	# event notty_analysis_disable(ts:time, sid:string, cid:count, byte_skip: count, byte_allow: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local byte_skip = ssh_int( parts[7] );
-	local byte_allow = ssh_int( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local byte_skip = ssh_int( parts[6] );
+	local byte_allow = ssh_int( parts[7] );
 
 	event notty_analysis_disable_2(ts,version,serv_interfaces,sid,cid,byte_skip,byte_allow);
 
@@ -818,15 +818,15 @@ function _notty_analysis_disable(_data: string) : count
 function _notty_analysis_disable_2(_data: string) : count
 	{
 	# event notty_analysis_disable_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, byte_skip: int, byte_allow: int)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local byte_skip = ssh_int( parts[7] );
-	local byte_allow = ssh_int( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local byte_skip = ssh_int( parts[6] );
+	local byte_allow = ssh_int( parts[7] );
 
 	event notty_analysis_disable_2(ts,version,serv_interfaces,sid,cid,byte_skip,byte_allow);
 
@@ -836,15 +836,15 @@ function _notty_analysis_disable_2(_data: string) : count
 function _notty_client_data(_data: string) : count
 	{
 	# event notty_client_data(ts:time, sid:string, cid:count, channel:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event notty_client_data_2(ts,version,serv_interfaces,sid,cid,channel,d);
 	
@@ -854,15 +854,15 @@ function _notty_client_data(_data: string) : count
 function _notty_client_data_2(_data: string) : count
 	{
 	# event notty_client_data_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event notty_client_data_2(ts,version,serv_interfaces,sid,cid,channel,d);
 
@@ -874,15 +874,15 @@ function _notty_server_data(_data: string) : count
 	# event notty_server_data(ts:time, sid:string, cid:count, channel:count, _data:string)
 	# notty_server_data time=1354513238.109957 uristring=32095_nid06135_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.128.24.40+10.10.20.101+ count=979185324 count=0
 	#  uristring=XXRETCODE:0
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event notty_server_data_2(ts,version,serv_interfaces,sid,cid,channel,d);
 
@@ -894,15 +894,15 @@ function _notty_server_data_2(_data: string) : count
 	# event notty_server_data_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
 	# notty_server_data_2 time=1354513239.716295 uristring=4436_dtn01_22 uristring=NMOD_2.11 uristring=127.0.0.1+10.55.46.155+128.55.32.199+128.55.80.35+ count=9195
 	# 55488 count=0 uristring=220+dtn01.nersc.gov+GridFTP+Server+3.33+(gcc64dbg,+1305148829-80)+%5BGlobus+Toolkit+5.0.4%5D+ready
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event notty_server_data_2(ts,version,serv_interfaces,sid,cid,channel,d);
 
@@ -914,13 +914,13 @@ function _server_heartbeat(_data: string) : count
 	return 0;
 	# event server_heartbeat(ts: time, sid: string, dt: count)
 	# server_heartbeat time=1342000801.940728 uristring=4582_cvrsvc09_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.13+128.55.56.13+128.55.69.232+128.55.33.232+ count=0
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local dt = ssh_count( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local dt = ssh_count( parts[5] );
 
 	#print "skipping event server_heartbeat(ts,sid,dt)";
 	}
@@ -930,13 +930,13 @@ function _server_heartbeat_2(_data: string) : count
 	return 0;
 
 	# event server_heartbeat_2(ts: time, version: string, serv_interfaces: string, sid: string, dt: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local dt = ssh_count( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local dt = ssh_count( parts[5] );
 
 	#print "skipping event server_heartbeat_2(ts,version,serv_interfaces,sid,dt)";
 
@@ -953,16 +953,16 @@ function _server_input_channel_open_2(_data: string) : count
 	{
 	# no id'd event, see:
 	#  server_input_channel_open_2 time=1342001102.115794 uristring=7340_dtn01_22 uristring=NMOD_2.11 uristring=127.0.0.1+10.55.46.155+128.55.32.199+128.55.80.35+ u ristring=session int=0 int=2097152 int=32768
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local s1 = ssh_string( parts[6] );
-	local i1 = ssh_int( parts[7] );
-	local i2 = ssh_int( parts[8] );
-	local i3 = ssh_int( parts[9] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local s1 = ssh_string( parts[5] );
+	local i1 = ssh_int( parts[6] );
+	local i2 = ssh_int( parts[7] );
+	local i3 = ssh_int( parts[8] );
 
 	return 0;
 	}
@@ -970,15 +970,15 @@ function _server_input_channel_open_2(_data: string) : count
 function _session_channel_request_3(_data: string) : count
 	{
 	# event session_channel_request_3(ts: time, version: string, sid: string, cid: count, pid: int, channel: count, rtype: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local pid = ssh_int( parts[6] );
-	local channel = ssh_count( parts[7] );
-	local rtype = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local pid = ssh_int( parts[5] );
+	local channel = ssh_count( parts[6] );
+	local rtype = ssh_string( parts[7] );
 
 	event session_channel_request_3(ts,version,sid,cid,pid,channel,rtype);
 
@@ -988,15 +988,15 @@ function _session_channel_request_3(_data: string) : count
 function _session_exit_3(_data: string) : count
 	{
 	# event session_exit_3(ts: time, version: string, sid: string, cid: count, channel: count, pid: count, ststus: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count ( parts[6] );
-	local pid = ssh_count( parts[7] );
-	local ststus = ssh_count( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count ( parts[5] );
+	local pid = ssh_count( parts[6] );
+	local ststus = ssh_count( parts[7] );
 
 	event session_exit_3(ts,version,sid,cid,channel,pid,ststus);
 
@@ -1006,17 +1006,17 @@ function _session_exit_3(_data: string) : count
 function _session_input_channel_open_3(_data: string) : count
 	{
 	# event session_input_channel_open_3(ts: time, version: string, sid: string, cid: count, tpe: count, ctype: string, rchan: int, rwindow: int, rmaxpack: int)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local tpe = ssh_count( parts[6] );
-	local ctype = ssh_string( parts[7] );
-	local rchan = ssh_int( parts[8] );
-	local rwindow = ssh_int( parts[9] );
-	local rmaxpack = ssh_int( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local tpe = ssh_count( parts[5] );
+	local ctype = ssh_string( parts[6] );
+	local rchan = ssh_int( parts[7] );
+	local rwindow = ssh_int( parts[8] );
+	local rmaxpack = ssh_int( parts[9] );
 
 	event session_input_channel_open_3(ts,version,sid,cid,tpe,ctype,rchan,rwindow,rmaxpack);
 
@@ -1026,14 +1026,14 @@ function _session_input_channel_open_3(_data: string) : count
 function _session_new_3(_data: string) : count
 	{
 	# event session_new_3(ts: time, version: string, sid: string, cid: count, pid: int, ver: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local pid = ssh_int( parts[6] );
-	local ver = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local pid = ssh_int( parts[5] );
+	local ver = ssh_string( parts[6] );
 
 	event session_new_3(ts,version,sid,cid,pid,ver);
 
@@ -1043,15 +1043,15 @@ function _session_new_3(_data: string) : count
 function _session_remote_do_exec_3(_data: string) : count
 	{
 	# event session_remote_do_exec_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local ppid = ssh_count( parts[7] );
-	local command = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local ppid = ssh_count( parts[6] );
+	local command = ssh_string( parts[7] );
 
 	event session_remote_do_exec_3(ts,version,sid,cid,channel,ppid,command);
 
@@ -1061,15 +1061,15 @@ function _session_remote_do_exec_3(_data: string) : count
 function _session_remote_exec_no_pty_3(_data: string) : count
 	{
 	# event session_remote_exec_no_pty_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local ppid = ssh_count( parts[7] );
-	local command = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local ppid = ssh_count( parts[6] );
+	local command = ssh_string( parts[7] );
 
 	event session_remote_exec_no_pty_3(ts,version,sid,cid,channel,ppid,command);
 	return 0;
@@ -1078,18 +1078,18 @@ function _session_remote_exec_no_pty_3(_data: string) : count
 function _session_request_direct_tcpip_3(_data: string) : count
 	{
 	# event session_request_direct_tcpip_3(ts: time, version: string, sid: string, cid: count, channel: count, originator: string, orig_port: port, target: string, target_port: port, i: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local originator = ssh_string( parts[7] );
-	local orig_port = ssh_port( parts[8] );
-	local target = ssh_string( parts[9] );
-	local target_port = ssh_port( parts[10] );
-	local i = ssh_count( parts[11] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local originator = ssh_string( parts[6] );
+	local orig_port = ssh_port( parts[7] );
+	local target = ssh_string( parts[8] );
+	local target_port = ssh_port( parts[9] );
+	local i = ssh_count( parts[10] );
 
 	event session_request_direct_tcpip_3(ts,version,sid,cid,channel,originator,orig_port,target,target_port,i);
 
@@ -1099,17 +1099,17 @@ function _session_request_direct_tcpip_3(_data: string) : count
 function _server_request_direct_tcpip(_data: string) : count
 	{
 	# event server_request_direct_tcpip(ts:time, sid:string, s_addr:string, s_port: port, r_addr: string, r_port: port, cid: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local s_addr = ssh_string( parts[6] );
-	local s_port = ssh_port( parts[7] + "/tcp" );
-	local r_addr = ssh_string( parts[8] );
-	local r_port = ssh_port( parts[9] + "/tcp" );
-	local cid = ssh_count( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local s_addr = ssh_string( parts[5] );
+	local s_port = ssh_port( parts[6] + "/tcp" );
+	local r_addr = ssh_string( parts[7] );
+	local r_port = ssh_port( parts[8] + "/tcp" );
+	local cid = ssh_count( parts[9] );
 
 	#event server_request_direct_tcpip(ts,sid,s_addr,s_port,r_addr,r_port,cid);
 
@@ -1119,17 +1119,17 @@ function _server_request_direct_tcpip(_data: string) : count
 function _server_request_direct_tcpip_2(_data: string) : count
 	{
 	# vent server_request_direct_tcpip_2(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:string, s_port: port, r_addr: string, r_port: port, cid: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local s_addr = ssh_string( parts[6] );
-	local s_port = ssh_port( parts[7] );
-	local r_addr = ssh_string( parts[8] );
-	local r_port = ssh_port( parts[9] );
-	local cid = ssh_count( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local s_addr = ssh_string( parts[5] );
+	local s_port = ssh_port( parts[6] );
+	local r_addr = ssh_string( parts[7] );
+	local r_port = ssh_port( parts[8] );
+	local cid = ssh_count( parts[9] );
 
 	event server_request_direct_tcpip_2(ts,version,serv_interfaces,sid,s_addr,s_port,r_addr,r_port,cid);
 
@@ -1139,14 +1139,14 @@ function _server_request_direct_tcpip_2(_data: string) : count
 function _session_x11fwd_3(_data: string) : count
 	{
 	# event session_x11fwd_3(ts: time, version: string, sid: string, cid: count, channel: count, display: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local display = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local display = ssh_string( parts[6] );
 
 	event session_x11fwd_3(ts,version,sid,cid,channel,display);
 
@@ -1156,15 +1156,15 @@ function _session_x11fwd_3(_data: string) : count
 function _sftp_process_close(_data: string) : count
 	{
 	# event sftp_process_close(ts:time, sid:string, cid:count, id: int, handle:int)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local id = ssh_int( parts[7] );
-	local handle = ssh_int( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local id = ssh_int( parts[6] );
+	local handle = ssh_int( parts[7] );
 
 	event sftp_process_close(ts,sid,cid,id,handle);
 	return 0;
@@ -1174,13 +1174,13 @@ function _sftp_process_close(_data: string) : count
 function _sftp_process_close_2(_data: string) : count
 	{
 	# event sftp_process_close(ts:time, sid:string, cid:count, id: int, handle:int)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local cid = ssh_count( parts[4] );
-	local id = ssh_int( parts[5] );
-	local handle = ssh_int( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local cid = ssh_count( parts[3] );
+	local id = ssh_int( parts[4] );
+	local handle = ssh_int( parts[5] );
 
 	event sftp_process_close(ts,sid,cid,id,handle);
 	return 0;
@@ -1190,15 +1190,15 @@ function _sftp_process_close_2(_data: string) : count
 function _sftp_process_close_3(_data: string) : count
 	{
 	# event sftp_process_close_3(ts:time, version: string, sid:string, cid:count, ppid: int, id: int, handle:int)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local id = ssh_int( parts[7] );
-	local handle = ssh_int( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local id = ssh_int( parts[6] );
+	local handle = ssh_int( parts[7] );
 
 	event sftp_process_close_3(ts,version,sid,cid,ppid,id,handle);
 	return 0;
@@ -1209,14 +1209,14 @@ function _sftp_process_do_stat(_data: string) : count
 	{
 	# event sftp_process_do_stat(ts:time, sid:string, cid:count, _data:string)
 	# event sftp_process_do_stat(ts:time, sid:string, version: string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_do_stat(ts,sid,version,cid,d);
 
@@ -1227,14 +1227,14 @@ function _sftp_process_do_stat_2(_data: string) : count
 	{
 	# event sftp_process_do_stat(ts:time, sid:string, cid:count, _data:string)
 	# event sftp_process_do_stat(ts:time, sid:string, version: string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_do_stat(ts,sid,version,cid,d);
 
@@ -1244,14 +1244,14 @@ function _sftp_process_do_stat_2(_data: string) : count
 function _sftp_process_do_stat_3(_data: string) : count
 	{
 	# event sftp_process_do_stat_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_do_stat_3(ts,version,sid,cid,ppid,d);
 
@@ -1265,15 +1265,15 @@ function _sftp_process_fsetstat(_data: string) : count
 	#  uristring=127.0.0.1+10.1.64.6+128.55.56.6+128.55.69.225+128.55.33.225+ 
 	#  count=0 int=185 uristring=/global/u2/b/bnlcat/work/TiO2/RuTi_formate/RuTi_formate_06.msi
 	# 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local ppid = ssh_int( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local ppid = ssh_int( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	event sftp_process_fsetstat(ts,sid,cid,d);
 
@@ -1283,14 +1283,14 @@ function _sftp_process_fsetstat(_data: string) : count
 function _sftp_process_fsetstat_3(_data: string) : count
 	{
 	# event sftp_process_mkdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string) 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_fsetstat_3(ts,version,sid,cid,ppid,d);
 
@@ -1300,14 +1300,14 @@ function _sftp_process_fsetstat_3(_data: string) : count
 function _sftp_process_fstat(_data: string) : count
 	{
 	# event sftp_process_fstat(ts:time, sid:string, cid:count, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_fstat(ts,sid,cid,d);
 
@@ -1318,15 +1318,15 @@ function _sftp_process_fstat_3(_data: string) : count
 	{
 	return 0;
 	# event sftp_process_fstat_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local i = ssh_int( parts[7] );
-	local d = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local i = ssh_int( parts[6] );
+	local d = ssh_string( parts[7] );
 
 	# for the time being I am removing this and opening a ticket on the isshd side event call
 	#event sftp_process_fstat_3(ts,version,sid,cid,ppid,d);
@@ -1340,20 +1340,20 @@ function _sftp_process_init(_data: string) : count
 	# sftp_process_init time=1350046754.477520 uristring=5854_cvrsvc01_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.5+128.55.56.5+128.55.69.224+128.55.33.224+ count=0 uristring=yiwang62 addr=128.118.156.18
 	# sftp_process_init time=1350046754.499153 uristring=5854_cvrsvc01_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.5+128.55.56.5+128.55.69.224+128.55.33.224+ count=0 int=3
 	#
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
 
 	local uid: string = "HOLDING";
 	local a: addr = ssh_addr("addr=127.0.0.1");
 
 	if ( |parts| > 7 ) {
-		uid = ssh_string( parts[7] );
-		a = ssh_addr( parts[8] );
+		uid = ssh_string( parts[6] );
+		a = ssh_addr( parts[7] );
 		}
 
 	event sftp_process_init(ts,sid,version,serv_interfaces,cid,uid,a);
@@ -1364,19 +1364,19 @@ function _sftp_process_init(_data: string) : count
 function _sftp_process_init_3(_data: string) : count
 	{
 	# event sftp_process_init_3(ts:time, version: string, sid:string, cid:count, ppid: int, vsn: string, caddr: addr)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
 	local vsn: string;
 	local caddr: addr;
 
 	if ( |parts| == 8 ) {
-		vsn = ssh_string( parts[7] );
-		caddr = ssh_addr( parts[8] );
+		vsn = ssh_string( parts[6] );
+		caddr = ssh_addr( parts[7] );
 		}
 	else {
 		vsn = ssh_string( "NAME" );
@@ -1392,14 +1392,14 @@ function _sftp_process_open(_data: string) : count
 	{
 	# event sftp_process_open(ts:time, sid:string, cid:count, _data:string)
 	# sftp_process_open time=1342723860.9219 uristring=11093_cvrsvc01_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.5+128.55.56.5+128.55.69.224+128.55.33.224+ count=0 uristring=/global/u2/a/amkessel/kdtree/cpu_prune/cpu_prune.cpp
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_open(ts,sid,cid,d);
 
@@ -1409,14 +1409,14 @@ function _sftp_process_open(_data: string) : count
 function _sftp_process_open_3(_data: string) : count
 	{
 	# event sftp_process_open_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_open_3(ts,version,sid,cid,ppid,d);
 
@@ -1426,14 +1426,14 @@ function _sftp_process_open_3(_data: string) : count
 function _sftp_process_opendir(_data: string) : count
 	{
 	# event sftp_process_opendir(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_opendir(ts,sid,cid,d);
 
@@ -1443,14 +1443,14 @@ function _sftp_process_opendir(_data: string) : count
 function _sftp_process_opendir_2(_data: string) : count
 	{
 	# event sftp_process_opendir(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_opendir(ts,sid,cid,d);
 
@@ -1461,14 +1461,14 @@ function _sftp_process_opendir_3(_data: string) : count
 	{
 	# event sftp_process_opendir(ts:time, sid:string, cid:count, _data:string)
 	# sftp_process_opendir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_opendir_3(ts,version,sid,cid,ppid,d);
 
@@ -1478,14 +1478,14 @@ function _sftp_process_opendir_3(_data: string) : count
 function _sftp_process_readdir(_data: string) : count
 	{
 	# event sftp_process_readdir(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_readdir(ts,sid,cid,d);
 
@@ -1495,14 +1495,14 @@ function _sftp_process_readdir(_data: string) : count
 function _sftp_process_readdir_2(_data: string) : count
 	{
 	# event sftp_process_readdir_2(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_readdir(ts,sid,cid,d);
 
@@ -1512,14 +1512,14 @@ function _sftp_process_readdir_2(_data: string) : count
 function _sftp_process_readdir_3(_data: string) : count
 	{
 	# event sftp_process_readdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_readdir_3(ts,version,sid,cid,ppid,d);
 
@@ -1529,14 +1529,14 @@ function _sftp_process_readdir_3(_data: string) : count
 function _sftp_process_realpath(_data: string) : count
 	{
 	# event sftp_process_realpath(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_realpath(ts,sid,cid,d);
 
@@ -1546,14 +1546,14 @@ function _sftp_process_realpath(_data: string) : count
 function _sftp_process_realpath_3(_data: string) : count
 	{
 	# event event sftp_process_realpath_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_realpath_3(ts,version,sid,cid,ppid,d);
 
@@ -1563,14 +1563,14 @@ function _sftp_process_realpath_3(_data: string) : count
 function _sftp_process_remove(_data: string) : count
 	{
 	# event sftp_process_remove(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 	
 	event sftp_process_remove(ts,sid,cid,d);
 
@@ -1580,17 +1580,17 @@ function _sftp_process_remove(_data: string) : count
 function _ssh_connection_end(_data: string) : count
 	{
 	# event ssh_connection_end(ts:time, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local s_addr = ssh_addr( parts[6] );
-	local s_port = ssh_port( parts[7] );
-	local r_addr = ssh_addr( parts[8] );
-	local r_port = ssh_port( parts[9] );
-	local cid = ssh_count( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local s_addr = ssh_addr( parts[5] );
+	local s_port = ssh_port( parts[6] );
+	local r_addr = ssh_addr( parts[7] );
+	local r_port = ssh_port( parts[8] );
+	local cid = ssh_count( parts[9] );
 
 	event ssh_connection_end_2(ts,version,serv_interfaces,sid,s_addr,s_port,r_addr,r_port,cid);
 
@@ -1600,17 +1600,17 @@ function _ssh_connection_end(_data: string) : count
 function _ssh_connection_end_2(_data: string) : count
 	{
 	# event ssh_connection_end_2(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local s_addr = ssh_addr( parts[6] );
-	local s_port = ssh_port( parts[7] );
-	local r_addr = ssh_addr( parts[8] );
-	local r_port = ssh_port( parts[9] );
-	local cid = ssh_count( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local s_addr = ssh_addr( parts[5] );
+	local s_port = ssh_port( parts[6] );
+	local r_addr = ssh_addr( parts[7] );
+	local r_port = ssh_port( parts[8] );
+	local cid = ssh_count( parts[9] );
 
 	event ssh_connection_end_2(ts,version,serv_interfaces,sid,s_addr,s_port,r_addr,r_port,cid);
 
@@ -1621,17 +1621,17 @@ function _ssh_connection_start(_data: string) : count
 	{
 	# event ssh_connection_start(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
 	# event ssh_connection_start(ts:time, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	#local version = ssh_string( parts[3] );
-	#local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local s_addr = ssh_addr( parts[6] );
-	local s_port = ssh_port( parts[7] );
-	local r_addr = ssh_addr( parts[8] );
-	local r_port = ssh_port( parts[9] );
-	local cid = ssh_count( parts[10] );
+	local ts = ssh_time( parts[1] );
+	#local version = ssh_string( parts[2] );
+	#local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local s_addr = ssh_addr( parts[5] );
+	local s_port = ssh_port( parts[6] );
+	local r_addr = ssh_addr( parts[7] );
+	local r_port = ssh_port( parts[8] );
+	local cid = ssh_count( parts[9] );
 
 	#event ssh_connection_start(ts,sid,s_addr,s_port,r_addr,r_port,cid);
 
@@ -1641,17 +1641,17 @@ function _ssh_connection_start(_data: string) : count
 function _ssh_connection_start_2(_data: string) : count
 	{
 	# event ssh_connection_start_2(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local s_addr = ssh_addr( parts[6] );
-	local s_port = ssh_port( parts[7] );
-	local r_addr = ssh_addr( parts[8] );
-	local r_port = ssh_port( parts[9] );
-	local cid = ssh_count( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local s_addr = ssh_addr( parts[5] );
+	local s_port = ssh_port( parts[6] );
+	local r_addr = ssh_addr( parts[7] );
+	local r_port = ssh_port( parts[8] );
+	local cid = ssh_count( parts[9] );
 
 	event ssh_connection_start_2(ts,version,serv_interfaces,sid,s_addr,s_port,r_addr,r_port,cid);
 
@@ -1661,16 +1661,16 @@ function _ssh_connection_start_2(_data: string) : count
 function _sshd_connection_end_3(_data: string) : count
 	{
 	# event sshd_connection_end_3(ts: time, version: string, sid: string, cid: count, r_addr: addr, r_port: port, l_addr: addr, l_port: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local r_addr = ssh_addr( parts[6] );
-	local r_port = ssh_port( parts[7] );
-	local l_addr = ssh_addr( parts[8] );
-	local l_port = ssh_port( parts[9] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local r_addr = ssh_addr( parts[5] );
+	local r_port = ssh_port( parts[6] );
+	local l_addr = ssh_addr( parts[7] );
+	local l_port = ssh_port( parts[8] );
 
 	event sshd_connection_end_3(ts,version,sid,cid,r_addr,r_port,l_addr,l_port);
 
@@ -1681,18 +1681,18 @@ function _sshd_connection_start_3(_data: string) : count
 	{
 	# event sshd_connection_start_3(ts: time, version: string, sid: string, cid: count, int_list: string, r_addr: addr, r_port: port, l_addr: addr, l_port: port, i: count)
 	# sshd_connection_start_3 time=1342000800.858400 uristring=NMOD_3.08 uristring=931154466%3Agrace01%3A22 count=1398340635 uristring=127.0.0.1_10.77.1.10_128.55.81.74_128.55.34.74_10.10.10.208 addr=10.77.1.1 port=48744/tcp addr=0.0.0.0 port=22/tcp count=140737488349744
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local int_list = ssh_string( parts[6] );
-	local r_addr = ssh_addr( parts[7] );
-	local r_port = ssh_port( parts[8] );
-	local l_addr = ssh_addr( parts[9] );
-	local l_port = ssh_port( parts[10] );
-	local i = ssh_count( parts[11] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local int_list = ssh_string( parts[5] );
+	local r_addr = ssh_addr( parts[6] );
+	local r_port = ssh_port( parts[7] );
+	local l_addr = ssh_addr( parts[8] );
+	local l_port = ssh_port( parts[9] );
+	local i = ssh_count( parts[10] );
 
 	event sshd_connection_start_3(ts,version,sid,cid,int_list,r_addr,r_port,l_addr,l_port,i);
 
@@ -1702,15 +1702,15 @@ function _sshd_connection_start_3(_data: string) : count
 function _sshd_key_fingerprint(_data: string) : count
 	{
 	# event sshd_key_fingerprint(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, fingerprint:string, key_type:string)yy
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local serv_interfaces = ssh_string( parts[4] );
-	local sid = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local fingerprint = ssh_string( parts[7] );
-	local key_type = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local serv_interfaces = ssh_string( parts[3] );
+	local sid = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local fingerprint = ssh_string( parts[6] );
+	local key_type = ssh_string( parts[7] );
 
 	event sshd_key_fingerprint_2(ts,version,serv_interfaces,sid,cid,fingerprint,key_type);
 
@@ -1720,15 +1720,15 @@ function _sshd_key_fingerprint(_data: string) : count
 function _sshd_key_fingerprint_2(_data: string) : count
 	{
 	# event sshd_key_fingerprint_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, fingerprint:string, key_type:string)yy
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local fingerprint = ssh_string( parts[7] );
-	local key_type = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local fingerprint = ssh_string( parts[6] );
+	local key_type = ssh_string( parts[7] );
 
 	event sshd_key_fingerprint_2(ts,sid,version,sid,cid,fingerprint,key_type);
 	return 0;
@@ -1737,12 +1737,12 @@ function _sshd_key_fingerprint_2(_data: string) : count
 function _sshd_server_heartbeat_3(_data: string) : count
 	{
 	# event sshd_server_heartbeat_3(ts: time, version: string, sid: string,  dt: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local dt = ssh_count( parts[5] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local dt = ssh_count( parts[4] );
 
 	event sshd_server_heartbeat_3(ts,version,sid,dt);
 
@@ -1752,13 +1752,13 @@ function _sshd_server_heartbeat_3(_data: string) : count
 function _sshd_start_3(_data: string) : count
 	{
 	# event sshd_start_3(ts: time, version: string, sid: string, h: addr, p: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local h = ssh_addr( parts[5] );
-	local p = ssh_port( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local h = ssh_addr( parts[4] );
+	local p = ssh_port( parts[5] );
 
 	event sshd_start_3(ts,version,sid,h,p);
 
@@ -1779,14 +1779,14 @@ function _ssh_login_fail_2(_data: string) : count
 function _ssh_remote_do_exec(_data: string) : count
 	{
 	# event ssh_remote_do_exec(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event ssh_remote_do_exec_2(ts,sid,version,serv_interfaces,cid,d);
 
@@ -1796,14 +1796,14 @@ function _ssh_remote_do_exec(_data: string) : count
 function _ssh_remote_do_exec_2(_data: string) : count
 	{
 	# event ssh_remote_do_exec_2(ts:time, sid:string, version:string, serv_interfaces: string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event ssh_remote_do_exec_2(ts,sid,version,serv_interfaces,cid,d);
 
@@ -1813,14 +1813,14 @@ function _ssh_remote_do_exec_2(_data: string) : count
 function _ssh_remote_exec_no_pty(_data: string) : count
 	{
 	# event ssh_remote_exec_no_pty_2(ts:time, sid:string, version:string, serv_interfaces:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event ssh_remote_exec_no_pty_2(ts,sid,version,serv_interfaces,cid,d);
 
@@ -1830,14 +1830,14 @@ function _ssh_remote_exec_no_pty(_data: string) : count
 function _ssh_remote_exec_no_pty_2(_data: string) : count
 	{
 	# event ssh_remote_exec_no_pty_2(ts:time, sid:string, version:string, serv_interfaces:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event ssh_remote_exec_no_pty_2(ts,sid,version,serv_interfaces,cid,d);
 
@@ -1847,12 +1847,12 @@ function _ssh_remote_exec_no_pty_2(_data: string) : count
 function _ssh_remote_exec_pty(_data: string) : count
 	{
 	# event ssh_remote_exec_pty(ts:time, sid:string, cid:count, _data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local cid = ssh_count( parts[4] );
-	local d = ssh_string( parts[5] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local cid = ssh_count( parts[3] );
+	local d = ssh_string( parts[4] );
 
 	event ssh_remote_exec_pty_2(ts,sid,cid,d);
 
@@ -1862,15 +1862,15 @@ function _ssh_remote_exec_pty(_data: string) : count
 function _session_remote_exec_pty_3(_data: string) : count
 	{
 	# event session_remote_exec_pty_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string) 
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local ppid = ssh_count( parts[7] );
-	local command = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local ppid = ssh_count( parts[6] );
+	local command = ssh_string( parts[7] );
 
 	event session_remote_exec_pty_3(ts,version,sid,cid,channel,ppid,command);
 
@@ -1880,13 +1880,13 @@ function _session_remote_exec_pty_3(_data: string) : count
 function _channel_pass_skip_3(_data: string) : count
 	{
 	# event channel_pass_skip_3(ts: time, version: string, sid: string, cid: count, channel: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
 
 	event channel_pass_skip_3(ts,version,sid,cid,channel);
 
@@ -1896,14 +1896,14 @@ function _channel_pass_skip_3(_data: string) : count
 function _auth_pass_attempt_3(_data: string) : count
 	{
 	# event auth_pass_attempt_3(ts: time, version: string, sid: string, cid: count, uid: string, password: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local uid = ssh_string( parts[6] );
-	local password = md5_hash( ssh_string( parts[7] ) );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local uid = ssh_string( parts[5] );
+	local password = md5_hash( ssh_string( parts[6] ) );
 
 	event auth_pass_attempt_3(ts,version,sid,cid,uid,password);
 
@@ -1913,13 +1913,13 @@ function _auth_pass_attempt_3(_data: string) : count
 function _sftp_process_symlink(_data: string) : count
 	{
 	# event event sftp_process_symlink(ts:time, sid:string, cid:count, old_path:string, new_path:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local cid = ssh_count( parts[4] );
-	local old_path = ssh_string( parts[5] );
-	local new_path = ssh_string( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local cid = ssh_count( parts[3] );
+	local old_path = ssh_string( parts[4] );
+	local new_path = ssh_string( parts[5] );
 
 	event sftp_process_symlink(ts,sid,cid,old_path,new_path);
 
@@ -1929,15 +1929,15 @@ function _sftp_process_symlink(_data: string) : count
 function _sftp_process_symlink_3(_data: string) : count
 	{
 	# event sftp_process_symlink_3(ts:time, version: string, sid:string, cid:count, ppid: int, old_path:string, new_path:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local old_path = ssh_string( parts[7] );
-	local new_path = ssh_string( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local old_path = ssh_string( parts[6] );
+	local new_path = ssh_string( parts[7] );
 
 	event sftp_process_symlink_3(ts,version,sid,cid,ppid,old_path,new_path);
 
@@ -1947,14 +1947,14 @@ function _sftp_process_symlink_3(_data: string) : count
 function _sftp_process_mkdir(_data: string) : count
 	{
 	# event sftp_process_mkdir(ts:time, sid:string, cid:count, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local cid = ssh_count( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local cid = ssh_count( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_mkdir(ts,sid,cid,d);
 
@@ -1964,14 +1964,14 @@ function _sftp_process_mkdir(_data: string) : count
 function _sftp_process_mkdir_3(_data: string) : count
 	{
 	# event sftp_process_mkdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_mkdir_3(ts,version,sid,cid,ppid,d);
 
@@ -1980,14 +1980,14 @@ function _sftp_process_mkdir_3(_data: string) : count
 function _invalid_user(_data: string) : count
 	{
 	#event invalid_user(ts:time, sid:string, version: string, interface:string, uid:string, cid: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local interface = ssh_string( parts[5] );
-	local uid = ssh_string( parts[6] );
-	local cid = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local interface = ssh_string( parts[4] );
+	local uid = ssh_string( parts[5] );
+	local cid = ssh_count( parts[6] );
 
 	event invalid_user_2(ts,sid,version,interface,uid,cid);
 
@@ -1997,14 +1997,14 @@ function _invalid_user(_data: string) : count
 function _invalid_user_2(_data: string) : count
 	{
 	#event invalid_user_2(ts:time, sid:string, version: string, serv_interfaces: string, uid:string, cid: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local sid = ssh_string( parts[3] );
-	local version = ssh_string( parts[4] );
-	local serv_interfaces = ssh_string( parts[5] );
-	local uid = ssh_string( parts[6] );
-	local cid = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local sid = ssh_string( parts[2] );
+	local version = ssh_string( parts[3] );
+	local serv_interfaces = ssh_string( parts[4] );
+	local uid = ssh_string( parts[5] );
+	local cid = ssh_count( parts[6] );
 
 	event invalid_user_2(ts,sid,version,serv_interfaces,uid,cid);
 
@@ -2014,13 +2014,13 @@ function _invalid_user_2(_data: string) : count
 function _auth_invalid_user_3(_data: string) : count
 	{
 	#event auth_invalid_user_3(ts: time, version: string, sid: string, cid: count, uid: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local uid = ssh_string( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local uid = ssh_string( parts[5] );
 
 	event auth_invalid_user_3(ts,version,sid,cid,uid);
 
@@ -2030,19 +2030,19 @@ function _auth_invalid_user_3(_data: string) : count
 function _channel_port_open_3(_data: string) : count
 	{
 	#event channel_port_open_3(ts: time, version: string, sid: string, cid: count, channel: count, rtype: string, l_port: port, path: string, h_port: port, rem_host: string, rem_port: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local rtype = ssh_string( parts[7] );
-	local l_port = ssh_port( parts[8] );
-	local path = ssh_string( parts[9] );
-	local h_port = ssh_port( parts[10] );
-	local rem_host = ssh_string( parts[11] );
-	local rem_port = ssh_port( parts[12] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local rtype = ssh_string( parts[6] );
+	local l_port = ssh_port( parts[7] );
+	local path = ssh_string( parts[8] );
+	local h_port = ssh_port( parts[9] );
+	local rem_host = ssh_string( parts[10] );
+	local rem_port = ssh_port( parts[11] );
 
 	event channel_port_open_3(ts,version,sid,cid,channel,rtype,l_port,path,h_port,rem_host,rem_port);
 
@@ -2052,15 +2052,15 @@ function _channel_port_open_3(_data: string) : count
 function _channel_portfwd_req_3(_data: string) : count
 	{
 	#event channel_portfwd_req_3(ts: time, version: string, sid: string, cid: count, channel:count, host: string, fwd_port: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local host = ssh_string( parts[7] );
-	local fwd_port = ssh_count( parts[8] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local host = ssh_string( parts[6] );
+	local fwd_port = ssh_count( parts[7] );
 
 	event channel_portfwd_req_3(ts,version,sid,cid,channel,host,fwd_port);
 
@@ -2070,17 +2070,17 @@ function _channel_portfwd_req_3(_data: string) : count
 function _channel_post_fwd_listener_3(_data: string) : count
 	{
 	#event channel_post_fwd_listener_3(ts: time, version: string, sid: string, cid: count, channel: count, l_port: port, path: string, h_port: port, rtype: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local l_port = ssh_port( parts[7] );
-	local path = ssh_string( parts[8] );
-	local h_port = ssh_port( parts[9] );
-	local rtype = ssh_string( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local l_port = ssh_port( parts[6] );
+	local path = ssh_string( parts[7] );
+	local h_port = ssh_port( parts[8] );
+	local rtype = ssh_string( parts[9] );
 
 	event channel_post_fwd_listener_3(ts,version,sid,cid,channel,l_port,path,h_port,rtype);
 
@@ -2090,18 +2090,18 @@ function _channel_post_fwd_listener_3(_data: string) : count
 function _channel_set_fwd_listener_3(_data: string) : count
 	{
 	#event channel_set_fwd_listener_3(ts: time, version: string, sid: string, cid: count, channel: count, c_type: count, wildcard: count, forward_host: string, l_port: port, h_port: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local c_type = ssh_count( parts[7] );
-	local wildcard = ssh_count( parts[8] );
-	local forward_host = ssh_string( parts[9] );
-	local l_port = ssh_port( parts[10] );
-	local h_port = ssh_port( parts[11] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local c_type = ssh_count( parts[6] );
+	local wildcard = ssh_count( parts[7] );
+	local forward_host = ssh_string( parts[8] );
+	local l_port = ssh_port( parts[9] );
+	local h_port = ssh_port( parts[10] );
 
 	event channel_set_fwd_listener_3(ts,version,sid,cid,channel,c_type,wildcard,forward_host,l_port,h_port);
 
@@ -2111,17 +2111,17 @@ function _channel_set_fwd_listener_3(_data: string) : count
 function _channel_socks4_3(_data: string) : count
 	{
 	#event channel_socks4_3(ts: time, version: string, sid: string, cid: count, channel: count, path: string, h_port: port, command: count, username: string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local path = ssh_string( parts[7] );
-	local h_port = ssh_port( parts[8] );
-	local command = ssh_count( parts[9] );
-	local username = ssh_string( parts[10] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local path = ssh_string( parts[6] );
+	local h_port = ssh_port( parts[7] );
+	local command = ssh_count( parts[8] );
+	local username = ssh_string( parts[9] );
 
 	event channel_socks4_3(ts,version,sid,cid,channel,path,h_port,command,username);
 
@@ -2131,16 +2131,16 @@ function _channel_socks4_3(_data: string) : count
 function _channel_socks5_3(_data: string) : count
 	{
 	#event channel_socks5_3(ts: time, version: string, sid: string, cid: count, channel: count, path: string, h_port: port, command: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local path = ssh_string( parts[7] );
-	local h_port = ssh_port( parts[8] );
-	local command = ssh_count( parts[9] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local path = ssh_string( parts[6] );
+	local h_port = ssh_port( parts[7] );
+	local command = ssh_count( parts[8] );
 
 	event channel_socks5_3(ts,version,sid,cid,channel,path,h_port,command);
 
@@ -2150,14 +2150,14 @@ function _channel_socks5_3(_data: string) : count
 function _session_do_auth_3(_data: string) : count
 	{
 	#event session_do_auth_3(ts: time, version: string, sid: string, cid: count, atype: count, type_ret: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local atype = ssh_count( parts[6] );
-	local type_ret = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local atype = ssh_count( parts[5] );
+	local type_ret = ssh_count( parts[6] );
 
 	event session_do_auth_3(ts,version,sid,cid,atype,type_ret);
 
@@ -2167,14 +2167,14 @@ function _session_do_auth_3(_data: string) : count
 function _session_tun_init_3(_data: string) : count
 	{
 	#event session_tun_init_3(ts: time, version: string, sid: string, cid: count, channel: count, mode: count)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local channel = ssh_count( parts[6] );
-	local mode = ssh_count( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local channel = ssh_count( parts[5] );
+	local mode = ssh_count( parts[6] );
 
 	event session_tun_init_3(ts,version,sid,cid,channel,mode);
 
@@ -2184,14 +2184,14 @@ function _session_tun_init_3(_data: string) : count
 function _sftp_process_remove_3(_data: string) : count
 	{
 	#event sftp_process_remove_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_remove_3(ts,version,sid,cid,ppid,d);
 
@@ -2201,14 +2201,14 @@ function _sftp_process_remove_3(_data: string) : count
 function _sftp_process_rmdir_3(_data: string) : count
 	{
 	#event sftp_process_rmdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_rmdir_3(ts,version,sid,cid,ppid,d);
 
@@ -2218,14 +2218,14 @@ function _sftp_process_rmdir_3(_data: string) : count
 function _sftp_process_unknown_3(_data: string) : count
 	{
 	#event sftp_process_unknown_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local cid = ssh_count( parts[5] );
-	local ppid = ssh_int( parts[6] );
-	local d = ssh_string( parts[7] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local cid = ssh_count( parts[4] );
+	local ppid = ssh_int( parts[5] );
+	local d = ssh_string( parts[6] );
 
 	event sftp_process_unknown_3(ts,version,sid,cid,ppid,d);
 
@@ -2235,13 +2235,13 @@ function _sftp_process_unknown_3(_data: string) : count
 function _sshd_exit_3(_data: string) : count
 	{
 	#event sshd_exit_3(ts: time, version: string, sid: string, h: addr, p: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local h = ssh_addr( parts[5] );
-	local p = ssh_port( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local h = ssh_addr( parts[4] );
+	local p = ssh_port( parts[5] );
 
 	event sshd_exit_3(ts,version,sid,h,p);
 
@@ -2251,13 +2251,13 @@ function _sshd_exit_3(_data: string) : count
 function _sshd_restart_3(_data: string) : count
 	{
 	#event sshd_restart_3(ts: time, version: string, sid: string, h: addr, p: port)
-	local parts = split(_data, kv_splitter);
+	local parts = string_split(_data, kv_splitter);
 
-	local ts = ssh_time( parts[2] );
-	local version = ssh_string( parts[3] );
-	local sid = ssh_string( parts[4] );
-	local h = ssh_addr( parts[5] );
-	local p = ssh_port( parts[6] );
+	local ts = ssh_time( parts[1] );
+	local version = ssh_string( parts[2] );
+	local sid = ssh_string( parts[3] );
+	local h = ssh_addr( parts[4] );
+	local p = ssh_port( parts[5] );
 
 	event sshd_restart_3(ts,version,sid,h,p);
 
@@ -2523,7 +2523,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 	{
 	local t_d = gsub(LV$d, /\x20\x20/, " ");	
 	LV$d = t_d;
-        local parts = split(LV$d, kv_splitter);
+        local parts = string_split(LV$d, kv_splitter);
 	local l_parts = |parts|;
 	local ni: count = 2;
 
@@ -2574,7 +2574,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 
 					# first chop up the line - if part [1] is in dispatcher
 					#   then we can start gluing bits back together
-					local t_test = split(st1[ v12[v] ], kv_splitter);
+					local t_test = string_split(st1[ v12[v] ], kv_splitter);
 
 					if ( t_test[1] in dispatcher ) {
 						if ( ret_data == "X" ) {
@@ -2584,7 +2584,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 						else {
 							# the current ret_val should contain a well formed event + args
 							# we now pedantically test it to make sure that it is well formed
-							local ttest = split(ret_data, kv_splitter);	
+							local ttest = string_split(ret_data, kv_splitter);	
 							local ename = ttest[1];
 							#print fmt("     TRY: %s %s", ename, |ttest|);
 							if ( ename in dispatcher ) {
