@@ -2537,7 +2537,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 	++input_count;
 
 	# get the event name
-	local event_name = parts[1];
+	local event_name = parts[0];
 	
 	# there is no reason for this value to be this low for a legitimate line
 	if ( l_parts < 5 )
@@ -2564,7 +2564,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 			# Kinda ugly, but if we are here the data is already assumed to be messed 
 			#   up , so anything  >> nothing...
 
-			local v12: vector of count = vector(1,2,3,4,5,6,7,8,9,10,11,12);
+			local v12: vector of count = vector(0,1,2,3,4,5,6,7,8,9,10,11);
 			local st1 = split_n(LV$d, sticky_test,T,20);
 			local ret_data = "X";
 			local v: count;
@@ -2585,7 +2585,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 							# the current ret_val should contain a well formed event + args
 							# we now pedantically test it to make sure that it is well formed
 							local ttest = string_split(ret_data, kv_splitter);	
-							local ename = ttest[1];
+							local ename = ttest[0];
 							#print fmt("     TRY: %s %s", ename, |ttest|);
 							if ( ename in dispatcher ) {
 								local aset = argument_count[ename];
