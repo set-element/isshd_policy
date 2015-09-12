@@ -77,8 +77,7 @@ export {
 
 	global suspicous_threshold: count = 5 &redef;
 	global suspicous_command_list = 
-		/^who/
-		| /^rpcinfo/
+		/^rpcinfo/
 		| /uname -a/
 		# it is quite handy that code writers tell us what they are doing ..
 		| /[Ll][Ii][Nn][Uu][Xx][[:blank:]]*([Ll][Oo0][Cc][Aa][Ll]|[Kk][Ee][Rr][Nn][Aa][Ll]).*([Ee][Xx][Pp][Ll][Oo0][Ii][Tt]|[Pp][Rr][Ii][Vv][Ll][Ee][Gg][Ee])/
@@ -113,49 +112,8 @@ export {
 	# Data formally from login.bro - this has been imported as a basic set with
 	#  additional notes put in the local instance init file.  
 	#
-	const input_trouble = 
-		  /rewt/
-		| /eggdrop/
-		| /(shell|xploit)_?code/
-		| /execshell/
-		| /unset[ \t]+(histfile|history|HISTFILE|HISTORY)/
-		| /cd[ \t]+\/dev\/[a-zA-Z]{3}/
-		| />\/etc\/passwd/
-		| /#define NOP.*0x/
-		# test to see if these generate too much noise
-		| /setuid\(0\)/
-		| /setgid\(0\)/
-		# look for shells being execed in a c-code sort of way
-		| /execl\(\"\/bin\/sh\"\, \"\/bin\/sh\", NULL\)/
-		# another test for signal/noise
-		| /open\(\"\/proc\/ksyms\", \"r\"\)/
-		# somewhat oldschool, but often old is tried before new ....
-		| /open\(\"\/dev\/(mem|kmem|oldmem|shmem)/
-		# the old self-re-exec ...
-		| /execl\(\"\/proc\/self\/exe\"/
-		# common more last year
-		| /selinux_ops|dummy_security_ops|capability_ops/
-		| /[Sh][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]/
-	&redef;
-
-	const output_trouble =
-		  /^-r.s.*root.*\/bin\/(sh|csh|tcsh)/
-		| /Jumping to address/
-		| /(shell|xploit)_code/
-		| /(shell|xploit)code/
-		| /execshell/
-		| /BOT_VERSION/
-		| /(cd \/; uname -a; pwd; id)/
-		| /[aA][dD][oO][rR][eE]/	# rootkit
-		| /setuid\(0\)/
-		| /setgid\(0\)/
-		| /execl\(\"\/bin\/sh\"\, \"\/bin\/sh\", NULL\)/
-		| /open\(\"\/proc\/ksyms\", \"r\"\)/
-		| /open\(\"\/dev\/(mem|kmem|oldmem|shmem)/
-		| /execl\(\"\/proc\/self\/exe\"/
-		| /selinux_ops|dummy_security_ops|capability_ops/
-		| /[Ss][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]/
-	&redef;
+	global input_trouble: pattern &redef;
+	global output_trouble: pattern &redef;
 
 	# lists of regular expressions which might trigger the hostile detect, but 
 	#   are actually benign from this context.
@@ -227,8 +185,7 @@ function parse_line(data: string, t: count) : set[string]
 			if ( t == LINE_CLIENT )  {
 
 				if ( (input_trouble in split_on_space[space_element]) && 
-					(split_on_space[space_element] !in return_set) &&
-					(input_trouble_whitelist !in split_on_sc[sc_element]) ) {
+					(split_on_space[space_element] !in return_set) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
 					print fmt("seen hostile LINE_CLIENT command: %s", split_on_space[space_element]);
@@ -238,8 +195,7 @@ function parse_line(data: string, t: count) : set[string]
 			if ( t == LINE_SERVER ) { 
 		
 				if ( (output_trouble in split_on_space[space_element]) && 
-					(split_on_space[space_element] !in return_set) &&
-					(output_trouble_whitelist !in split_on_sc[sc_element]) ) {
+					(split_on_space[space_element] !in return_set) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
 					print fmt("seen hostile LINE_SERVER command: %s", split_on_space[space_element]);
