@@ -191,7 +191,7 @@ function ssh_int(s: string) : int
 function dump_line_data(_data: string) : count
 	{
 	local ret = 0;
-        local parts = string_split(_data, kv_splitter);
+        local parts = split_string(_data, kv_splitter);
 	local l_parts = |parts|;
 	local ni: count = 2;
 	local event_name = parts[0];
@@ -214,7 +214,7 @@ function dump_line_data(_data: string) : count
 function _auth_info_3(_data: string) : count
 	{
 	# event auth_info_3(ts: time, version: string, sid: string, cid: count, authmsg: string, uid: string, meth: string, s_addr: addr, s_port: port, r_addr: addr, r_port: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -237,7 +237,7 @@ function _sftp_process_readlink_3(_data: string) : count
 	{
 	#event sftp_process_readlink_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string) 
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -255,7 +255,7 @@ function _sftp_process_readlink_2(_data: string) : count
 	{
 	# event sftp_process_readlink(ts:time, sid:string, cid:count, data:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -273,7 +273,7 @@ function _sftp_process_readlink(_data: string) : count
 	{
 	# event sftp_process_readlink(ts:time, sid:string, cid:count, data:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -291,7 +291,7 @@ function _sftp_process_rename(_data: string) : count
 	{
 	# event sftp_process_rename(ts:time, sid:string, cid:count, old_name:string, new_name:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -310,7 +310,7 @@ function _sftp_process_rename_2(_data: string) : count
 	{
 	# event sftp_process_rename(ts:time, sid:string, cid:count, old_name:string, new_name:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -329,7 +329,7 @@ function _sftp_process_rename_3(_data: string) : count
 	{
 	# event sftp_process_rename_3(ts:time, version: string, sid:string, cid:count, ppid: int, old_name:string, new_name:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -348,7 +348,7 @@ function _sftp_process_setstat_2(_data: string) : count
 	{
 	# event sftp_process_setstat(ts:time, sid:string, cid:count, data:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -367,7 +367,7 @@ function _sftp_process_setstat_3(_data: string) : count
 	{
 	# event sftp_process_setstat_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -385,7 +385,7 @@ function _sftp_process_setstat_3(_data: string) : count
 function _auth_key_fingerprint_3(_data: string) : count
 	{
 	# event auth_key_fingerprint_3(ts: time, version: string, sid: string, cid: count, fingerprint: string, key_type: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -402,7 +402,7 @@ function _auth_key_fingerprint_3(_data: string) : count
 function _auth_ok(_data: string) : count
 	{
 	# event auth_ok(ts:time, sid:string, uid:string, authtype:string, s_addr: addr, s_port: port, r_addr: addr, r_port: port, cid: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -424,7 +424,7 @@ function _auth_ok(_data: string) : count
 function _auth_ok_2(_data: string) : count
 	{
 	# event auth_ok_2(ts:time, version: string, serv_interfaces: string, sid:string, uid:string, authtype:string, s_addr: addr, s_port: port, r_addr: addr, r_port: port, cid: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -445,7 +445,7 @@ function _auth_ok_2(_data: string) : count
 function _channel_data_client_3(_data: string) : count
 	{
 	# event channel_data_client_3(ts: time, version: string, sid: string, cid: count, channel:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -461,7 +461,7 @@ function _channel_data_client_3(_data: string) : count
 function _channel_data_server_3(_data: string) : count
 	{
 	# event channel_data_server_3(ts: time, version: string, sid: string, cid: count, channel: count, _data: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -480,7 +480,7 @@ function _data_server_sum(_data: string) : count
 	# 55.69.224+128.55.33.224+ count=441292721 count=0 count=11123
 	# data_server_sum(ts: time, sid: string, version: string, serv_interfaces: string,cid: count, channel: count, bytes_skip: count)
 	# Q: last set in order ??
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -501,7 +501,7 @@ function _data_server_sum_2(_data: string) : count
 	# 55.69.224+128.55.33.224+ count=441292721 count=0 count=11123
 	# data_server_sum(ts: time, sid: string, version: string, serv_interfaces: string,cid: count, channel: count, bytes_skip: count)
 	# Q: last set in order ??
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -519,7 +519,7 @@ function _data_server_sum_2(_data: string) : count
 function _channel_data_server_sum_3(_data: string) : count
 	{
 	# event channel_data_server_sum_3(ts: time, version: string, sid: string, cid: count, channel: count, bytes_skip: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -548,7 +548,7 @@ function _channel_exit_2(_data: string) : count
 function _channel_free_3(_data: string) : count
 	{
 	# event channel_free_3(ts: time, version: string, sid: string, cid: count,channel: count, name: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -565,7 +565,7 @@ function _channel_free_3(_data: string) : count
 function _channel_new_3(_data: string) : count
 	{
 	# event channel_new_3(ts: time, version: string, sid: string, cid: count, found: count, ctype: count, name: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -583,7 +583,7 @@ function _channel_new_3(_data: string) : count
 function _channel_notty_analysis_disable_3(_data: string) : count
 	{
 	# event channel_notty_analysis_disable_3(ts: time, version: string, sid: string, cid: count, channel: count, byte_skip: int, byte_sent: int)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -611,7 +611,7 @@ function _channel_notty_analysis_disable_3(_data: string) : count
 function _channel_notty_client_data_3(_data: string) : count
 	{
 	# event channel_notty_client_data_3(ts: time, version: string, sid: string, cid: count, channel: count, _data: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -629,7 +629,7 @@ function _channel_notty_server_data_3(_data: string) : count
 	{
 	# event channel_notty_server_data_3(ts: time, version: string, sid: string, cid: count, channel: count, _data: string)
 	# channel_notty_server_data_3 time=1435820103.444348 uristring=NMOD_3.08 uristring=537580590%3Amndlnx02%3A22 count=935192037 count=0 uristring=
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 	local l_parts = |parts|;
 
 	local ts = ssh_time( parts[1] );
@@ -647,7 +647,7 @@ function _data_client(_data: string) : count
 	{
 	# event data_client(ts:time, sid:string, cid:count, channel:count, _data:string)
 	# data_client time=1342000801.342046 uristring=8247_hopper08_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.77.1.9+128.55.68.39+128.55.34.73+10.10.10.207+10.10.30.207+10.10.20.208+ count=627016360 count=0 uristring=p%7Fcd+C%09
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -665,7 +665,7 @@ function _data_client(_data: string) : count
 function _data_client_2(_data: string) : count
 	{
 	# event data_client_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -683,7 +683,7 @@ function _data_client_2(_data: string) : count
 function _data_server(_data: string) : count
 	{
 	# event data_server(ts:time, sid:string, cid:count, channel:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -701,7 +701,7 @@ function _data_server(_data: string) : count
 function _data_server_2(_data: string) : count
 	{
 	# event data_server_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -730,7 +730,7 @@ function data_server_sum_2(_data: string) : count
 function _new_channel_session(_data: string) : count
 	{
 	# event new_channel_session(ts:time, sid:string, channel:count, channel_type:string, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -748,7 +748,7 @@ function _new_channel_session(_data: string) : count
 function _new_channel_session_2(_data: string) : count
 	{
 	# event new_channel_session_2(ts:time, version: string, serv_interfaces: string, sid:string, channel:count, channel_type:string, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -766,7 +766,7 @@ function _new_channel_session_2(_data: string) : count
 function _new_session(_data: string) : count
 	{
 	# event new_session(ts:time, sid:string, version:string, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -783,7 +783,7 @@ function _new_session(_data: string) : count
 function _new_session_2(_data: string) : count
 	{
 	# event new_session_2(ts:time, version: string, serv_interfaces: string, sid:string, ver:string, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -800,7 +800,7 @@ function _new_session_2(_data: string) : count
 function _notty_analysis_disable(_data: string) : count
 	{
 	# event notty_analysis_disable(ts:time, sid:string, cid:count, byte_skip: count, byte_allow: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -818,7 +818,7 @@ function _notty_analysis_disable(_data: string) : count
 function _notty_analysis_disable_2(_data: string) : count
 	{
 	# event notty_analysis_disable_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, byte_skip: int, byte_allow: int)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -836,7 +836,7 @@ function _notty_analysis_disable_2(_data: string) : count
 function _notty_client_data(_data: string) : count
 	{
 	# event notty_client_data(ts:time, sid:string, cid:count, channel:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -854,7 +854,7 @@ function _notty_client_data(_data: string) : count
 function _notty_client_data_2(_data: string) : count
 	{
 	# event notty_client_data_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -874,7 +874,7 @@ function _notty_server_data(_data: string) : count
 	# event notty_server_data(ts:time, sid:string, cid:count, channel:count, _data:string)
 	# notty_server_data time=1354513238.109957 uristring=32095_nid06135_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.128.24.40+10.10.20.101+ count=979185324 count=0
 	#  uristring=XXRETCODE:0
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -894,7 +894,7 @@ function _notty_server_data_2(_data: string) : count
 	# event notty_server_data_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, channel:count, _data:string)
 	# notty_server_data_2 time=1354513239.716295 uristring=4436_dtn01_22 uristring=NMOD_2.11 uristring=127.0.0.1+10.55.46.155+128.55.32.199+128.55.80.35+ count=9195
 	# 55488 count=0 uristring=220+dtn01.nersc.gov+GridFTP+Server+3.33+(gcc64dbg,+1305148829-80)+%5BGlobus+Toolkit+5.0.4%5D+ready
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -914,7 +914,7 @@ function _server_heartbeat(_data: string) : count
 	return 0;
 	# event server_heartbeat(ts: time, sid: string, dt: count)
 	# server_heartbeat time=1342000801.940728 uristring=4582_cvrsvc09_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.13+128.55.56.13+128.55.69.232+128.55.33.232+ count=0
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -930,7 +930,7 @@ function _server_heartbeat_2(_data: string) : count
 	return 0;
 
 	# event server_heartbeat_2(ts: time, version: string, serv_interfaces: string, sid: string, dt: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -953,7 +953,7 @@ function _server_input_channel_open_2(_data: string) : count
 	{
 	# no id'd event, see:
 	#  server_input_channel_open_2 time=1342001102.115794 uristring=7340_dtn01_22 uristring=NMOD_2.11 uristring=127.0.0.1+10.55.46.155+128.55.32.199+128.55.80.35+ u ristring=session int=0 int=2097152 int=32768
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -970,7 +970,7 @@ function _server_input_channel_open_2(_data: string) : count
 function _session_channel_request_3(_data: string) : count
 	{
 	# event session_channel_request_3(ts: time, version: string, sid: string, cid: count, pid: int, channel: count, rtype: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -988,7 +988,7 @@ function _session_channel_request_3(_data: string) : count
 function _session_exit_3(_data: string) : count
 	{
 	# event session_exit_3(ts: time, version: string, sid: string, cid: count, channel: count, pid: count, ststus: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1006,7 +1006,7 @@ function _session_exit_3(_data: string) : count
 function _session_input_channel_open_3(_data: string) : count
 	{
 	# event session_input_channel_open_3(ts: time, version: string, sid: string, cid: count, tpe: count, ctype: string, rchan: int, rwindow: int, rmaxpack: int)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1026,7 +1026,7 @@ function _session_input_channel_open_3(_data: string) : count
 function _session_new_3(_data: string) : count
 	{
 	# event session_new_3(ts: time, version: string, sid: string, cid: count, pid: int, ver: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1043,7 +1043,7 @@ function _session_new_3(_data: string) : count
 function _session_remote_do_exec_3(_data: string) : count
 	{
 	# event session_remote_do_exec_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1061,7 +1061,7 @@ function _session_remote_do_exec_3(_data: string) : count
 function _session_remote_exec_no_pty_3(_data: string) : count
 	{
 	# event session_remote_exec_no_pty_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1078,7 +1078,7 @@ function _session_remote_exec_no_pty_3(_data: string) : count
 function _session_request_direct_tcpip_3(_data: string) : count
 	{
 	# event session_request_direct_tcpip_3(ts: time, version: string, sid: string, cid: count, channel: count, originator: string, orig_port: port, target: string, target_port: port, i: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1099,7 +1099,7 @@ function _session_request_direct_tcpip_3(_data: string) : count
 function _server_request_direct_tcpip(_data: string) : count
 	{
 	# event server_request_direct_tcpip(ts:time, sid:string, s_addr:string, s_port: port, r_addr: string, r_port: port, cid: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1119,7 +1119,7 @@ function _server_request_direct_tcpip(_data: string) : count
 function _server_request_direct_tcpip_2(_data: string) : count
 	{
 	# vent server_request_direct_tcpip_2(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:string, s_port: port, r_addr: string, r_port: port, cid: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1139,7 +1139,7 @@ function _server_request_direct_tcpip_2(_data: string) : count
 function _session_x11fwd_3(_data: string) : count
 	{
 	# event session_x11fwd_3(ts: time, version: string, sid: string, cid: count, channel: count, display: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1156,7 +1156,7 @@ function _session_x11fwd_3(_data: string) : count
 function _sftp_process_close(_data: string) : count
 	{
 	# event sftp_process_close(ts:time, sid:string, cid:count, id: int, handle:int)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1174,7 +1174,7 @@ function _sftp_process_close(_data: string) : count
 function _sftp_process_close_2(_data: string) : count
 	{
 	# event sftp_process_close(ts:time, sid:string, cid:count, id: int, handle:int)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1190,7 +1190,7 @@ function _sftp_process_close_2(_data: string) : count
 function _sftp_process_close_3(_data: string) : count
 	{
 	# event sftp_process_close_3(ts:time, version: string, sid:string, cid:count, ppid: int, id: int, handle:int)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1209,7 +1209,7 @@ function _sftp_process_do_stat(_data: string) : count
 	{
 	# event sftp_process_do_stat(ts:time, sid:string, cid:count, _data:string)
 	# event sftp_process_do_stat(ts:time, sid:string, version: string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1227,7 +1227,7 @@ function _sftp_process_do_stat_2(_data: string) : count
 	{
 	# event sftp_process_do_stat(ts:time, sid:string, cid:count, _data:string)
 	# event sftp_process_do_stat(ts:time, sid:string, version: string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1244,7 +1244,7 @@ function _sftp_process_do_stat_2(_data: string) : count
 function _sftp_process_do_stat_3(_data: string) : count
 	{
 	# event sftp_process_do_stat_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1265,7 +1265,7 @@ function _sftp_process_fsetstat(_data: string) : count
 	#  uristring=127.0.0.1+10.1.64.6+128.55.56.6+128.55.69.225+128.55.33.225+ 
 	#  count=0 int=185 uristring=/global/u2/b/bnlcat/work/TiO2/RuTi_formate/RuTi_formate_06.msi
 	# 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1283,7 +1283,7 @@ function _sftp_process_fsetstat(_data: string) : count
 function _sftp_process_fsetstat_3(_data: string) : count
 	{
 	# event sftp_process_mkdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string) 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1300,7 +1300,7 @@ function _sftp_process_fsetstat_3(_data: string) : count
 function _sftp_process_fstat(_data: string) : count
 	{
 	# event sftp_process_fstat(ts:time, sid:string, cid:count, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1318,7 +1318,7 @@ function _sftp_process_fstat_3(_data: string) : count
 	{
 	return 0;
 	# event sftp_process_fstat_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1340,7 +1340,7 @@ function _sftp_process_init(_data: string) : count
 	# sftp_process_init time=1350046754.477520 uristring=5854_cvrsvc01_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.5+128.55.56.5+128.55.69.224+128.55.33.224+ count=0 uristring=yiwang62 addr=128.118.156.18
 	# sftp_process_init time=1350046754.499153 uristring=5854_cvrsvc01_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.5+128.55.56.5+128.55.69.224+128.55.33.224+ count=0 int=3
 	#
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1364,7 +1364,7 @@ function _sftp_process_init(_data: string) : count
 function _sftp_process_init_3(_data: string) : count
 	{
 	# event sftp_process_init_3(ts:time, version: string, sid:string, cid:count, ppid: int, vsn: string, caddr: addr)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1392,7 +1392,7 @@ function _sftp_process_open(_data: string) : count
 	{
 	# event sftp_process_open(ts:time, sid:string, cid:count, _data:string)
 	# sftp_process_open time=1342723860.9219 uristring=11093_cvrsvc01_22 uristring=NMOD_2.9 uristring=127.0.0.1+10.1.64.5+128.55.56.5+128.55.69.224+128.55.33.224+ count=0 uristring=/global/u2/a/amkessel/kdtree/cpu_prune/cpu_prune.cpp
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1409,7 +1409,7 @@ function _sftp_process_open(_data: string) : count
 function _sftp_process_open_3(_data: string) : count
 	{
 	# event sftp_process_open_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1426,7 +1426,7 @@ function _sftp_process_open_3(_data: string) : count
 function _sftp_process_opendir(_data: string) : count
 	{
 	# event sftp_process_opendir(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1443,7 +1443,7 @@ function _sftp_process_opendir(_data: string) : count
 function _sftp_process_opendir_2(_data: string) : count
 	{
 	# event sftp_process_opendir(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1461,7 +1461,7 @@ function _sftp_process_opendir_3(_data: string) : count
 	{
 	# event sftp_process_opendir(ts:time, sid:string, cid:count, _data:string)
 	# sftp_process_opendir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1478,7 +1478,7 @@ function _sftp_process_opendir_3(_data: string) : count
 function _sftp_process_readdir(_data: string) : count
 	{
 	# event sftp_process_readdir(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1495,7 +1495,7 @@ function _sftp_process_readdir(_data: string) : count
 function _sftp_process_readdir_2(_data: string) : count
 	{
 	# event sftp_process_readdir_2(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1512,7 +1512,7 @@ function _sftp_process_readdir_2(_data: string) : count
 function _sftp_process_readdir_3(_data: string) : count
 	{
 	# event sftp_process_readdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1529,7 +1529,7 @@ function _sftp_process_readdir_3(_data: string) : count
 function _sftp_process_realpath(_data: string) : count
 	{
 	# event sftp_process_realpath(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1546,7 +1546,7 @@ function _sftp_process_realpath(_data: string) : count
 function _sftp_process_realpath_3(_data: string) : count
 	{
 	# event event sftp_process_realpath_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1563,7 +1563,7 @@ function _sftp_process_realpath_3(_data: string) : count
 function _sftp_process_remove(_data: string) : count
 	{
 	# event sftp_process_remove(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1580,7 +1580,7 @@ function _sftp_process_remove(_data: string) : count
 function _ssh_connection_end(_data: string) : count
 	{
 	# event ssh_connection_end(ts:time, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1600,7 +1600,7 @@ function _ssh_connection_end(_data: string) : count
 function _ssh_connection_end_2(_data: string) : count
 	{
 	# event ssh_connection_end_2(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1621,7 +1621,7 @@ function _ssh_connection_start(_data: string) : count
 	{
 	# event ssh_connection_start(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
 	# event ssh_connection_start(ts:time, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	#local version = ssh_string( parts[2] );
@@ -1641,7 +1641,7 @@ function _ssh_connection_start(_data: string) : count
 function _ssh_connection_start_2(_data: string) : count
 	{
 	# event ssh_connection_start_2(ts:time, version: string, serv_interfaces: string, sid:string, s_addr:addr, s_port:port, r_addr:addr, r_port:port, cid:count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1661,7 +1661,7 @@ function _ssh_connection_start_2(_data: string) : count
 function _sshd_connection_end_3(_data: string) : count
 	{
 	# event sshd_connection_end_3(ts: time, version: string, sid: string, cid: count, r_addr: addr, r_port: port, l_addr: addr, l_port: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1681,7 +1681,7 @@ function _sshd_connection_start_3(_data: string) : count
 	{
 	# event sshd_connection_start_3(ts: time, version: string, sid: string, cid: count, int_list: string, r_addr: addr, r_port: port, l_addr: addr, l_port: port, i: count)
 	# sshd_connection_start_3 time=1342000800.858400 uristring=NMOD_3.08 uristring=931154466%3Agrace01%3A22 count=1398340635 uristring=127.0.0.1_10.77.1.10_128.55.81.74_128.55.34.74_10.10.10.208 addr=10.77.1.1 port=48744/tcp addr=0.0.0.0 port=22/tcp count=140737488349744
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1702,7 +1702,7 @@ function _sshd_connection_start_3(_data: string) : count
 function _sshd_key_fingerprint(_data: string) : count
 	{
 	# event sshd_key_fingerprint(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, fingerprint:string, key_type:string)yy
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1720,7 +1720,7 @@ function _sshd_key_fingerprint(_data: string) : count
 function _sshd_key_fingerprint_2(_data: string) : count
 	{
 	# event sshd_key_fingerprint_2(ts:time, version: string, serv_interfaces: string, sid:string, cid:count, fingerprint:string, key_type:string)yy
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1737,7 +1737,7 @@ function _sshd_key_fingerprint_2(_data: string) : count
 function _sshd_server_heartbeat_3(_data: string) : count
 	{
 	# event sshd_server_heartbeat_3(ts: time, version: string, sid: string,  dt: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1752,7 +1752,7 @@ function _sshd_server_heartbeat_3(_data: string) : count
 function _sshd_start_3(_data: string) : count
 	{
 	# event sshd_start_3(ts: time, version: string, sid: string, h: addr, p: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1779,7 +1779,7 @@ function _ssh_login_fail_2(_data: string) : count
 function _ssh_remote_do_exec(_data: string) : count
 	{
 	# event ssh_remote_do_exec(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1796,7 +1796,7 @@ function _ssh_remote_do_exec(_data: string) : count
 function _ssh_remote_do_exec_2(_data: string) : count
 	{
 	# event ssh_remote_do_exec_2(ts:time, sid:string, version:string, serv_interfaces: string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1813,7 +1813,7 @@ function _ssh_remote_do_exec_2(_data: string) : count
 function _ssh_remote_exec_no_pty(_data: string) : count
 	{
 	# event ssh_remote_exec_no_pty_2(ts:time, sid:string, version:string, serv_interfaces:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1830,7 +1830,7 @@ function _ssh_remote_exec_no_pty(_data: string) : count
 function _ssh_remote_exec_no_pty_2(_data: string) : count
 	{
 	# event ssh_remote_exec_no_pty_2(ts:time, sid:string, version:string, serv_interfaces:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1847,7 +1847,7 @@ function _ssh_remote_exec_no_pty_2(_data: string) : count
 function _ssh_remote_exec_pty(_data: string) : count
 	{
 	# event ssh_remote_exec_pty(ts:time, sid:string, cid:count, _data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1862,7 +1862,7 @@ function _ssh_remote_exec_pty(_data: string) : count
 function _session_remote_exec_pty_3(_data: string) : count
 	{
 	# event session_remote_exec_pty_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string) 
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1880,7 +1880,7 @@ function _session_remote_exec_pty_3(_data: string) : count
 function _channel_pass_skip_3(_data: string) : count
 	{
 	# event channel_pass_skip_3(ts: time, version: string, sid: string, cid: count, channel: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1896,7 +1896,7 @@ function _channel_pass_skip_3(_data: string) : count
 function _auth_pass_attempt_3(_data: string) : count
 	{
 	# event auth_pass_attempt_3(ts: time, version: string, sid: string, cid: count, uid: string, password: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1913,7 +1913,7 @@ function _auth_pass_attempt_3(_data: string) : count
 function _sftp_process_symlink(_data: string) : count
 	{
 	# event event sftp_process_symlink(ts:time, sid:string, cid:count, old_path:string, new_path:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1929,7 +1929,7 @@ function _sftp_process_symlink(_data: string) : count
 function _sftp_process_symlink_3(_data: string) : count
 	{
 	# event sftp_process_symlink_3(ts:time, version: string, sid:string, cid:count, ppid: int, old_path:string, new_path:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1947,7 +1947,7 @@ function _sftp_process_symlink_3(_data: string) : count
 function _sftp_process_mkdir(_data: string) : count
 	{
 	# event sftp_process_mkdir(ts:time, sid:string, cid:count, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1964,7 +1964,7 @@ function _sftp_process_mkdir(_data: string) : count
 function _sftp_process_mkdir_3(_data: string) : count
 	{
 	# event sftp_process_mkdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -1980,7 +1980,7 @@ function _sftp_process_mkdir_3(_data: string) : count
 function _invalid_user(_data: string) : count
 	{
 	#event invalid_user(ts:time, sid:string, version: string, interface:string, uid:string, cid: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -1997,7 +1997,7 @@ function _invalid_user(_data: string) : count
 function _invalid_user_2(_data: string) : count
 	{
 	#event invalid_user_2(ts:time, sid:string, version: string, serv_interfaces: string, uid:string, cid: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local sid = ssh_string( parts[2] );
@@ -2014,7 +2014,7 @@ function _invalid_user_2(_data: string) : count
 function _auth_invalid_user_3(_data: string) : count
 	{
 	#event auth_invalid_user_3(ts: time, version: string, sid: string, cid: count, uid: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2030,7 +2030,7 @@ function _auth_invalid_user_3(_data: string) : count
 function _channel_port_open_3(_data: string) : count
 	{
 	#event channel_port_open_3(ts: time, version: string, sid: string, cid: count, channel: count, rtype: string, l_port: port, path: string, h_port: port, rem_host: string, rem_port: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2052,7 +2052,7 @@ function _channel_port_open_3(_data: string) : count
 function _channel_portfwd_req_3(_data: string) : count
 	{
 	#event channel_portfwd_req_3(ts: time, version: string, sid: string, cid: count, channel:count, host: string, fwd_port: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2070,7 +2070,7 @@ function _channel_portfwd_req_3(_data: string) : count
 function _channel_post_fwd_listener_3(_data: string) : count
 	{
 	#event channel_post_fwd_listener_3(ts: time, version: string, sid: string, cid: count, channel: count, l_port: port, path: string, h_port: port, rtype: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2090,7 +2090,7 @@ function _channel_post_fwd_listener_3(_data: string) : count
 function _channel_set_fwd_listener_3(_data: string) : count
 	{
 	#event channel_set_fwd_listener_3(ts: time, version: string, sid: string, cid: count, channel: count, c_type: count, wildcard: count, forward_host: string, l_port: port, h_port: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2111,7 +2111,7 @@ function _channel_set_fwd_listener_3(_data: string) : count
 function _channel_socks4_3(_data: string) : count
 	{
 	#event channel_socks4_3(ts: time, version: string, sid: string, cid: count, channel: count, path: string, h_port: port, command: count, username: string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2131,7 +2131,7 @@ function _channel_socks4_3(_data: string) : count
 function _channel_socks5_3(_data: string) : count
 	{
 	#event channel_socks5_3(ts: time, version: string, sid: string, cid: count, channel: count, path: string, h_port: port, command: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2150,7 +2150,7 @@ function _channel_socks5_3(_data: string) : count
 function _session_do_auth_3(_data: string) : count
 	{
 	#event session_do_auth_3(ts: time, version: string, sid: string, cid: count, atype: count, type_ret: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2167,7 +2167,7 @@ function _session_do_auth_3(_data: string) : count
 function _session_tun_init_3(_data: string) : count
 	{
 	#event session_tun_init_3(ts: time, version: string, sid: string, cid: count, channel: count, mode: count)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2184,7 +2184,7 @@ function _session_tun_init_3(_data: string) : count
 function _sftp_process_remove_3(_data: string) : count
 	{
 	#event sftp_process_remove_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2201,7 +2201,7 @@ function _sftp_process_remove_3(_data: string) : count
 function _sftp_process_rmdir_3(_data: string) : count
 	{
 	#event sftp_process_rmdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2218,7 +2218,7 @@ function _sftp_process_rmdir_3(_data: string) : count
 function _sftp_process_unknown_3(_data: string) : count
 	{
 	#event sftp_process_unknown_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2235,7 +2235,7 @@ function _sftp_process_unknown_3(_data: string) : count
 function _sshd_exit_3(_data: string) : count
 	{
 	#event sshd_exit_3(ts: time, version: string, sid: string, h: addr, p: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2251,7 +2251,7 @@ function _sshd_exit_3(_data: string) : count
 function _sshd_restart_3(_data: string) : count
 	{
 	#event sshd_restart_3(ts: time, version: string, sid: string, h: addr, p: port)
-	local parts = string_split(_data, kv_splitter);
+	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
 	local version = ssh_string( parts[2] );
@@ -2523,105 +2523,57 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 	{
 	local t_d = gsub(LV$d, /\x20\x20/, " ");	
 	LV$d = t_d;
-        local parts = string_split(LV$d, kv_splitter);
-	local l_parts = |parts|;
-	local ni: count = 2;
 
-	local sticky_test: pattern = /auth_info_3|auth_invalid_user_3|auth_key_fingerprint_3|auth_ok auth_ok_2|auth_pass_attempt_3/
-		| /channel_data_client_3|channel_data_server_3|channel_data_server_sum_3|channel_exit|channel_exit_2|channel_free_3|channel_new_3|channel_notty_analysis_disable_3|channel_notty_client_data_3|channel_notty_server_data_3|channel_pass_skip_3|channel_portfwd_req_3|channel_port_open_3|channel_post_fwd_listener_3|channel_set_fwd_listener_3|channel_socks4_3|channel_socks5_3/
-		| /data_client|data_client_2|data_server|data_server_2|data_server_sum|data_server_sum_2/
-		| /session_channel_request_3|session_do_auth_3|session_exit_3|session_input_channel_open_3|session_new_3|session_remote_do_exec_3|session_remote_exec_no_pty_3|session_remote_exec_pty_3|session_request_direct_tcpip_3|session_tun_init_3|session_x11fwd_3/
-		| /sshd_connection_end_3|sshd_connection_start_3|sshd_exit_3|sshd_key_fingerprint|sshd_key_fingerprint_2|sshd_restart_3|sshd_server_heartbeat_3|sshd_start_3/;
+        local parts = split_string(LV$d, kv_splitter);
+	local l_parts = |parts|;
+	# get the event name
+	local event_name = parts[0];
 
 	# count the transaction record
 	++input_count;
 
-	# get the event name
-	local event_name = parts[0];
-	
 	# there is no reason for this value to be this low for a legitimate line
 	if ( l_parts < 5 )
 		return;
 
-	if ( event_name in dispatcher ) {
+
+	# look up the first field as event_name
+	# Since a very common issue is extra linefeed, reparse after the first
+	#  ^J and retry,  If that doesn't work, bail since the line is probably corrupt
+	#  puttering around here in the main event loop is not such a good idea...
+	#
+        if ( event_name !in dispatcher ) {
+
+                local delim = /\r|\n/;
+                local t = split_string(LV$d, delim);
 	
-		if ( event_name in argument_count ) {
-			local arg_set = argument_count[event_name];
-			local i: count;
-			for ( i in arg_set ) {
-				if ( l_parts == arg_set[i] ) {
-					dispatcher[event_name](LV$d);
-					return;
-					}
-				}
+		# Quick sanity check here since this is just a guess ...
+		if ( |t| < 2 )
+                        return;
 
-			# If we get to this place, the initial event identification is correct - 
-			#   that is it is in the dispatcher list, but there is something wrong 
-			#   with the argument checker.  This block of code will attempt to 
-			#   disect the blob of text, parsing it based on the set of known event
-			#   names, and rebuilding the various bits as it can.
-			#
-			# Kinda ugly, but if we are here the data is already assumed to be messed 
-			#   up , so anything  >> nothing...
+                parts = split_string(t[1], kv_splitter);
+                event_name = parts[0];
 
-			local v12: vector of count = vector(0,1,2,3,4,5,6,7,8,9,10,11);
-			local st1 = split_n(LV$d, sticky_test,T,20);
-			local ret_data = "X";
-			local v: count;
+                if ( event_name !in dispatcher ) {
+                        print fmt("ERROR: %s", LV$d);
+                        return;
+                                }
+                }
 
-			for ( v in v12 ) {
-				if ( v < |st1| ) {
+	# make sure that the
+	if ( event_name in argument_count ) {
+		local arg_set = argument_count[event_name];
+		local i: count;
 
-					# first chop up the line - if part [1] is in dispatcher
-					#   then we can start gluing bits back together
-					local t_test = string_split(st1[ v12[v] ], kv_splitter);
+		for ( i in arg_set ) {
+			if ( l_parts == arg_set[i] ) {
+				dispatcher[event_name](LV$d);
+				return;
+                                }
+                        }
+                }
+        }
 
-					if ( t_test[1] in dispatcher ) {
-						if ( ret_data == "X" ) {
-							# first time through...
-							ret_data = fmt("%s", st1[ v12[v] ]);
-							}
-						else {
-							# the current ret_val should contain a well formed event + args
-							# we now pedantically test it to make sure that it is well formed
-							local ttest = string_split(ret_data, kv_splitter);	
-							local ename = ttest[0];
-							#print fmt("     TRY: %s %s", ename, |ttest|);
-							if ( ename in dispatcher ) {
-								local aset = argument_count[ename];
-								local x: count;
-								for ( x in aset ) {
-									if ( |ttest| == aset[x] ) {
-										LV$d = ret_data;
-										# flush old value to event handler
-										event sshLine(description, tpe, LV);
-										#print fmt("     FIX %s", ename);
-										}
-									} # end for
-								}
-							else {
-								# This is a stub for accounting
-								} # end dispatch test
-
-							ret_data = st1[ v12[v] ];
-							}
-						}
-					else {
-						# t_test[1] not in dispatcher - if not empty, append
-						if ( |st1[ v12[v] ]| > 1 ) {
-							ret_data = fmt("%s%s", ret_data, st1[ v12[v] ]);
-							}
-						else {
-							# another accounting stub
-							}
-						} # end dispatch test else
-							
-					} # |st1| test
-				} # end for-v loop
-			}
-		}
-
-	}
 
 event stop_reader()
 	{
@@ -2636,7 +2588,8 @@ event start_reader()
 	{
 	print "start reader";
 	if ( stop_sem == 1 ) { 
-		Input::add_event([$source=data_file, $reader=Input::READER_RAW, $mode=Input::TSTREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
+		local dataSource = fmt("tail --follow=name %s |", data_file);
+		Input::add_event([$source=dataSource, $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 		stop_sem = 0;
 		}
 	}
@@ -2698,7 +2651,8 @@ function init_datastream() : count
 	
 	if ( DATANODE && (file_size(data_file) != -1.0) ) {
 		print fmt("%s SSHD data file %s located", gethostname(), data_file);
-		Input::add_event([$source=data_file, $reader=Input::READER_RAW, $mode=Input::TSTREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
+		local dataSource = fmt("tail --follow=name %s |", data_file);
+		Input::add_event([$source=dataSource , $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 
 		# start rate monitoring for event stream 
 		schedule input_test_interval { transaction_rate() };
