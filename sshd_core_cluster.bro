@@ -1127,87 +1127,87 @@ event sshd_restart_3(ts: time, version: string, sid: string, h: addr, p: port)
 
 event sshd_server_heartbeat_3(ts: time, version: string, sid: string,  dt: count)
 	{
-	# no server record, no heartbeat data ...
-	if ( sid !in s_records )
-		return; 
+        # no server record, no heartbeat data ...
+        if ( sid !in s_records )
+                return;
 
-	local SR:server_record = test_sid(sid);
-	local isRemote: bool = is_remote_event();
-	local ts_d:double = time_to_double(ts);
-	local trigger_heartbeat: bool = F;
-	local state = SR$heartbeat_state;
+        local SR:server_record = test_sid(sid);
+        local isRemote: bool = is_remote_event();
+        local ts_d:double = time_to_double(ts);
+        local trigger_heartbeat: bool = F;
+        local state = SR$heartbeat_state;
 
-	if ( isRemote ) {
+        #print fmt("HB CALL remote: %s  state: %s   dt: %s", isRemote, state, dt);
 
-		if ( state == HB_INIT ) {
-			# first time we have seen this heartbeat - fill
-			#  in the base values and set a notice
+        if ( dt == 10000 ) {
+                if ( state == HB_INIT )
+                        # this should not happen since we have not seen the initial
+                        #  remote heartbeat.  best to just quietly go
+                        return;
 
-			SR$heartbeat_state = HB_OK;
-			SR$heartbeat_last = ts_d;
-			trigger_heartbeat = T;
+                if ( state == HB_OK ) {
+                        # classic state test- just make sure that not too much time
+                        #  has passed and whatnot
 
-			NOTICE([$note=SSHD_NewHeartbeat,
-				$msg=fmt("New communication from %s", sid)]);
-			}
+                        # Interval test
+                        if ( ( ts_d - SR$heartbeat_last ) > interval_to_double(heartbeat_timeout) ) {
 
-		if ( state == HB_OK ) 
-			# just another heartbeat...
-			SR$heartbeat_last = ts_d;
+                                # A sufficient interval of time has passed that we are interested
+                                #  in what is going on.  heartbeat_tmeout = 300 sec by default
 
-		if ( state == HB_ERROR ) {
-			# reset last seen timestamp and state value
-			SR$heartbeat_last = ts_d;
-			SR$heartbeat_state = HB_OK;
-			}
+                                NOTICE([$note=SSHD_Heartbeat,
+                                        $msg=fmt("Lost communication to %s, dt=%s",
+                                                sid, ts_d - SR$heartbeat_last)]);
 
-		# now update 
-		s_records[sid] = SR;
+                                # reset this value to avoid redundant notices
+                                SR$heartbeat_state = HB_ERROR;
 
-		} # end isRemote
+                                } # End interval test
 
-	if ( !isRemote ) {
-		if ( state == HB_INIT ) 
-			# this should not happen since we have not seen the initial
-			#  remote heartbeat.  best to just quietly go
-			return;
+                        trigger_heartbeat = T;
+                        }
 
-		if ( state == HB_OK ) {
-			# classic state test- just make sure that not too much time
-			#  has passed and whatnot
+                if ( state == HB_ERROR )
+                        # not much else to do here - trigger another check and keep on going
+                        trigger_heartbeat = T;
 
-			# Interval test
-			if ( ( ts_d - SR$heartbeat_last ) > interval_to_double(heartbeat_timeout) ) {
-			
-				# A sufficient interval of time has passed that we are interested
-				#  in what is going on.  heartbeat_tmeout = 300 sec by default
-			
-				NOTICE([$note=SSHD_Heartbeat,
-					$msg=fmt("Lost communication to %s, dt=%s",
-						sid, ts_d - SR$heartbeat_last)]);
-			
-				# reset this value to avoid redundant notices
-				SR$heartbeat_state = HB_ERROR;
+                } # end !isRemote
+        else {
 
-				} # End interval test
+                if ( state == HB_INIT ) {
+                        # first time we have seen this heartbeat - fill
+                        #  in the base values and set a notice
 
-			trigger_heartbeat = T;	
-			}
+                        SR$heartbeat_state = HB_OK;
+                        SR$heartbeat_last = ts_d;
+                        trigger_heartbeat = T;
 
-		if ( state == HB_ERROR )
-			# not much else to do here - trigger another check and keep on going 
-			trigger_heartbeat = T;	
+                        NOTICE([$note=SSHD_NewHeartbeat,
+                                $msg=fmt("New communication from %s", sid)]);
+                        }
 
-		} # end !isRemote
+                if ( state == HB_OK )
+                        # just another heartbeat...
+                        SR$heartbeat_last = ts_d;
 
-	# send a new heartbeat
-	if ( trigger_heartbeat ) {
+                if ( state == HB_ERROR ) {
+                        # reset last seen timestamp and state value
+                        SR$heartbeat_last = ts_d;
+                        SR$heartbeat_state = HB_OK;
+                        }
 
-		local hb_sched:interval = heartbeat_timeout + rand(10) * 1 sec;
-		local new_time = double_to_time( interval_to_double(hb_sched) + ts_d );
+                } # end isRemote
+        # now update
+        s_records[sid] = SR;
 
-		schedule hb_sched { sshd_server_heartbeat_3(new_time, version, sid, 0) };
-		}
+        # send a new heartbeat
+        if ( trigger_heartbeat ) {
+
+                local hb_sched:interval = heartbeat_timeout + rand(10) * 1 sec;
+                local new_time = double_to_time( interval_to_double(hb_sched) + ts_d );
+
+                schedule hb_sched { sshd_server_heartbeat_3(new_time, version, sid, 10000) };
+                }
 
 	}
 event sshd_start_3(ts: time, version: string, sid: string, h: addr, p: port)
@@ -1224,7 +1224,17 @@ event sshd_start_3(ts: time, version: string, sid: string, h: addr, p: port)
 	log_server_session(t_sid, ts, "SSHD_START_3", "SSHD_START_3");
 }
 
+event session_key_exchange_3(ts: time, version: string, sid: string, cid: count, kx_data: string)
+{
+ 	local CR:client_record = test_cid(sid,cid);
+
+ 	log_session_update_event(CR, ts, "SESSION_KEY_EXCHANGE", kx_data);
+
+}
+
 event bro_init() &priority=5
 {
 	Log::create_stream(SSHD_CORE::LOG, [$columns=Info]);
+	local filter_c: Log::Filter = [$name="default", $path="sshd_core"];
+	Log::add_filter(LOG, filter_c);
 }
