@@ -49,8 +49,7 @@ export {
 
 	global suspicous_threshold: count = 5 &redef;
 	global suspicous_command_list = 
-		/^who/
-		| /^id[\ ]*$/
+		/^id[\ ]*$/
 		| /^last/
 		| /^cd .ssh/
 		| /^finger/
@@ -124,7 +123,6 @@ export {
 	| /#define NOP.*0x/
 	| /printf\(\"overflowing/
 	| /exec[a-z]*\(\"\/usr\/openwin/
-	| /perl[ \t]+.*x.*[0-9][0-9][0-9][0-9]/
 	| /ping.*-s.*%d/
 	&redef;
 
