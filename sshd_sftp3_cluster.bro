@@ -351,4 +351,6 @@ event sftp_process_unknown_3(ts:time, version: string, sid:string, cid:count, pp
 event bro_init() &priority=5
 {
         Log::create_stream(SFTP_AUDIT::LOG, [$columns=Info]);
+	local filter_c: Log::Filter = [$name="default", $path="sftp_log"];
+	Log::add_filter(LOG, filter_c);
 }
