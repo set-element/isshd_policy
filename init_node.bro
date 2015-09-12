@@ -10,5 +10,6 @@
 # type=worker
 # host=sigma-n
 # aux_scripts="isshd_policy/init_node"
-#
+@load isshd_policy
 redef SSHD_IN_STREAM::DATANODE = T;
+redef SSHD_IN_STREAM::data_file = "/data/sshd_logs/ssh_logging";
