@@ -1,0 +1,63 @@
+diff --git a/src/analyzer/protocol/http/functions.bif b/src/analyzer/protocol/http/functions.bif
+index 6ef6fec..6c0d4b8 100644
+--- a/src/analyzer/protocol/http/functions.bif
++++ b/src/analyzer/protocol/http/functions.bif
+@@ -54,3 +54,58 @@ function unescape_URI%(URI: string%): string
+ 
+ 	return new StringVal(analyzer::http::unescape_URI(line, line_end, 0));
+ 	%}
++
++
++function raw_unescape_URI%(URI: string%): string
++        %{
++        const u_char* line = URI->Bytes();
++        const u_char* const line_end = line + URI->Len();
++
++        byte_vec decoded_URI = new u_char[line_end - line + 1];
++        byte_vec URI_p = decoded_URI;
++
++        while ( line < line_end )
++                {
++                if ( *line == '%' )
++                        {
++                        ++line;
++
++                        if ( line == line_end )
++                                {
++                                // How to deal with % at end of line?
++                                break;
++                                }
++                        else if ( *line == '%' )
++                                {
++                                // Double '%' might be either due to
++                                // software bug, or more likely, an
++                                // evasion (e.g. used by Nimda).
++                                --line; // ignore the first '%'
++                                }
++                        else if ( isxdigit(line[0]) && isxdigit(line[1]) )
++                                {
++                                *URI_p++ = (decode_hex(line[0]) << 4) +
++                                           decode_hex(line[1]);
++                                ++line; // place line at the last hex digit
++                                }
++                        else
++                                {
++                                *URI_p++ = '%'; // put back initial '%'
++                                *URI_p++ = *line; // take char w/o interp.
++                                }
++                        }
++                else
++                        {
++                        *URI_p++ = *line;
++                        }
++
++                ++line;
++                }
++
++        URI_p[0] = 0;
++
++        StringVal* rsv = new StringVal( (int)(URI_p - decoded_URI), (const char*)decoded_URI);
++       free(decoded_URI);
++
++       return rsv;
++       %}
