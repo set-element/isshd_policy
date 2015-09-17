@@ -29,10 +29,6 @@ export {
 	global port_match: pattern = /^[0-9]{1,5}\/(tcp|udp|icmp)$/;
 	global time_match: pattern = /^[0-9]{9,10}.[0-9]{0,6}$/;
 
-	# this pattern is used to take apart multi-line patterns that are stuck together
-	# they tend to focus on just a few event types, so we try them for now
-	global multi_match: pattern = /^notty_server_data |^channel_notty_server_data_3 |^channel_data_server_3 |^channel_notty_client_data_3 |^data_server |^notty_server_data_2 |^data_client |^data_server_2 /;
-#
 	global v16: vector of count = vector(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
 	global v2s: vector of count = vector(2,4,6);
 
@@ -2587,9 +2583,12 @@ event stop_reader()
 event start_reader()
 	{
 	print "start reader";
-	if ( stop_sem == 1 ) { 
-		local dataSource = fmt("tail --follow=name %s |", data_file);
-		Input::add_event([$source=dataSource, $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
+	if ( stop_sem == 1 ) {
+		local config_strings: table[string] of string = {
+			["offset"] = "-1",
+			};
+
+		Input::add_event([$source=data_file, $config=config_strings, $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 		stop_sem = 0;
 		}
 	}
@@ -2651,8 +2650,12 @@ function init_datastream() : count
 	
 	if ( DATANODE && (file_size(data_file) != -1.0) ) {
 		print fmt("%s SSHD data file %s located", gethostname(), data_file);
-		local dataSource = fmt("tail --follow=name %s |", data_file);
-		Input::add_event([$source=dataSource , $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
+
+		local config_strings: table[string] of string = {
+			["offset"] = "-1",
+			};
+
+		Input::add_event([$source=data_file, $config=config_strings, $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 
 		# start rate monitoring for event stream 
 		schedule input_test_interval { transaction_rate() };
