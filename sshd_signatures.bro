@@ -138,7 +138,7 @@ redef SSHD_POLICY::output_trouble +=
 	| /selinux_ops|dummy_security_ops|capability_ops/
 	| /[Xx][Hh][Ee3][Ll1][Ll1][Cc][Oo0[Dd][Ee]/;
 
-redef suspicous_command_list =
+redef SSHD_POLICY::suspicous_command_list =
 	/^rpcinfo/
 	| /uname -a/
 	# it is quite handy that code writers tell us what they are doing ..
