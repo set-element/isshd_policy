@@ -146,26 +146,6 @@ export {
 	#
 	######################################################################################
 
-	# suspicous commands 
-	global notify_suspicous_command = T &redef;
-
-	global suspicous_threshold: count = 5 &redef;
-	global suspicous_command_list = 
-		/^who/
-		| /^rpcinfo/
-	&redef;
-
-	# this set of commands should be alarmed on when executed
-	#  remotely
-	global alarm_remote_exec =
-		/sh -i/
-		| /bash -i/
-	&redef;
-
-	const user_white_list =
-		/^billybob$/
-	&redef;
-
 	# heartbeat timeout interval ...
 	const heartbeat_timeout = 300 sec &redef;
 
