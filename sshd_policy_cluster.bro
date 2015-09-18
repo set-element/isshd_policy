@@ -161,6 +161,7 @@ function parse_line(data: string, t: count) : set[string]
 			if ( t == LINE_CLIENT )  {
 
 				if ( (input_trouble in split_on_space[space_element]) && 
+					(input_trouble_whitelist !in split_on_space[space_element]) &&
 					(split_on_space[space_element] !in return_set) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
@@ -170,7 +171,8 @@ function parse_line(data: string, t: count) : set[string]
 
 			if ( t == LINE_SERVER ) { 
 		
-				if ( (output_trouble in split_on_space[space_element]) && 
+				if ( (output_trouble in split_on_space[space_element]) &&
+					(output_trouble_whitelist !in split_on_space[space_element]) && 
 					(split_on_space[space_element] !in return_set) ) {
 
 		 			add return_set[ split_on_space[space_element] ];
@@ -277,7 +279,7 @@ function test_hostile_client(data:string, CR: SSHD_CORE::client_record, channel:
 	{
 	local ret= 0; # default return value
 
-	if ( input_trouble in data ) {
+	if ( (input_trouble in data) && (input_trouble_whitelist !in data) ) {
 
 		# now extract the offending command(s)
 		local s_set: set[string];
@@ -319,7 +321,7 @@ function test_hostile_server(data:string, CR: SSHD_CORE::client_record, channel:
 	{
 	local ret= 0; # default return value
 
-	if ( output_trouble in data ) {
+	if ( (output_trouble in data) && (output_trouble_whitelist !in data) ) {
 
 		# now extract the offending command(s)
 		local s_set: set[string];
