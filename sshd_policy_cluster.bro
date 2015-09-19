@@ -102,17 +102,6 @@ export {
 } # end export
 
 ######################################################################################
-#  external values
-######################################################################################
-
-#redef notice_action_filters += {
-#	[SSHD_RemoteExecHostile] = send_email_notice,
-#	[SSHD_BadKey] = send_email_notice,
-#};
-
-
-
-######################################################################################
 #  data structs and tables
 ######################################################################################
 # 
@@ -259,7 +248,7 @@ function test_remote_exec(data: string, CR: SSHD_CORE::client_record, sid:string
 
 	if ( alarm_remote_exec in data ) {
 
-		# ... these are not the androids that you are looking for ...
+		# ... these are not the droids that you are looking for ...
 		if ( alarm_remote_exec_whitelist !in data ) {	
 			#
 			NOTICE([$note=SSHD_RemoteExecHostile,
@@ -330,7 +319,7 @@ function test_hostile_server(data:string, CR: SSHD_CORE::client_record, channel:
 		s_set = parse_line(data, LINE_SERVER);	
 
 		# if data contains a locally whitelisted element, then
-		#  the return vlue here might be empty.  If so, then
+		#  the return value here might be empty.  If so, then
 		#  bail
 		if ( |s_set| == 0 )
 			return ret;
@@ -460,7 +449,7 @@ event channel_notty_server_data_3(ts: time, version: string, sid: string, cid: c
 				CR$channel_type[channel] = "unknown";
 			}
 
-		# run client data through analyzer for both suspicous and hostile content
+		# run server data through analyzer for both suspicous and hostile content
 		test_suspicous(data, CR, channel, sid, cid);
 		test_hostile_server(data, CR, channel, sid, cid);
 	}
