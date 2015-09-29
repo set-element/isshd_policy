@@ -268,7 +268,12 @@ function test_hostile_client(data:string, CR: SSHD_CORE::client_record, channel:
 	{
 	local ret= 0; # default return value
 
-	if ( (input_trouble in data) && (input_trouble_whitelist !in data) ) {
+	if (input_trouble in data) {
+
+		# quick check to see if the whitelist is populated and if
+		#   the data is in place
+		if ( (|input_trouble_whitelist| > 0) && (input_trouble_whitelist in data) )
+			return ret;
 
 		# now extract the offending command(s)
 		local s_set: set[string];
@@ -310,7 +315,12 @@ function test_hostile_server(data:string, CR: SSHD_CORE::client_record, channel:
 	{
 	local ret= 0; # default return value
 
-	if ( (output_trouble in data) && (output_trouble_whitelist !in data) ) {
+	if (output_trouble in data) {
+
+		# quick check to see if the whitelist is populated and if
+		#   the data is in place
+		if ( (|output_trouble_whitelist| > 0) && (output_trouble_whitelist in data) )
+			return ret;
 
 		# now extract the offending command(s)
 		local s_set: set[string];
