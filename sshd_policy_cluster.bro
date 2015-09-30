@@ -76,25 +76,25 @@ export {
 	global notify_suspicous_command = T &redef;
 
 	global suspicous_threshold: count = 5 &redef;
-	global suspicous_command_list: pattern &redef;
+	global suspicous_command_list: pattern = string_to_pattern(unique_id(""), T) &redef;
 
 	# this set of commands should be alarmed on when executed
 	#  remotely
-	global alarm_remote_exec: pattern &redef;
-	global alarm_remote_exec_whitelist: pattern &redef;
+	global alarm_remote_exec: pattern = string_to_pattern(unique_id(""), T) &redef;
+	global alarm_remote_exec_whitelist: pattern = string_to_pattern(unique_id(""), T) &redef;
 
-	global user_white_list: pattern &redef;
+	global user_white_list: pattern = string_to_pattern(unique_id(""), T) &redef;
 
 	# Data formally from login.bro - this has been imported as a basic set with
 	#  additional notes put in the local instance init file.  
 	#
-	global input_trouble: pattern &redef;
-	global output_trouble: pattern &redef;
+	global input_trouble: pattern = string_to_pattern(unique_id(""), T) &redef;
+	global output_trouble: pattern = string_to_pattern(unique_id(""), T) &redef;
 
 	# lists of regular expressions which might trigger the hostile detect, but 
 	#   are actually benign from this context.
-	const input_trouble_whitelist: pattern &redef;
-	const output_trouble_whitelist: pattern &redef;
+	const input_trouble_whitelist: pattern = string_to_pattern(unique_id(""), T) &redef;
+	const output_trouble_whitelist: pattern = string_to_pattern(unique_id(""), T) &redef;
 	# 
 	# data in the form of aa:bb:cc:dd:ee:ff:gg:hh:ii:jj:kk:ll:mm:nn:oo:pp
 	global bad_key_list: set[string] &redef;
