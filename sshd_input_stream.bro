@@ -16,6 +16,7 @@ export {
 		SSHD_INPUT_UnknownEvent,
 		SSHD_INPUT_LowTransactionRate,
 		SSHD_INPUT_HighTransactionRate,
+		SSHD_INPUT_DataReset,
 		};
 
 	## table holding map between event name -> handling function
@@ -1356,16 +1357,16 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 
 event stop_reader()
 	{
-	print "stop reader";
 	if ( stop_sem == 0 ) {
 		Input::remove("isshd");
 		stop_sem = 1;
+
+		NOTICE([$note=SSHD_INPUT_DataReset,$msg=fmt("stopping reader")]);
 		}
 	}
 
 event start_reader()
 	{
-	print "start reader";
 	if ( stop_sem == 1 ) {
 		local config_strings: table[string] of string = {
 			["offset"] = "-1",
@@ -1373,6 +1374,8 @@ event start_reader()
 
 		Input::add_event([$source=data_file, $config=config_strings, $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 		stop_sem = 0;
+
+		NOTICE([$note=SSHD_INPUT_DataReset,$msg=fmt("starting reader")]);
 		}
 	}
 
