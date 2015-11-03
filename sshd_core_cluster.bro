@@ -38,6 +38,11 @@ export {
 		key:		string	&log;
 		## connection 4-tuple
 		id:		conn_id	&log;
+		## external host: host attached to forward
+		##  tunnel or proxy
+		ext_host:       string  &log &default="FWDHOST_UNKNOWN";
+		## external port: port attached to ext_host address
+		ext_port:       string  &log &default="FWDPORT_UNKNOWN";
 		## user assosciated with session
 		uid:		string	&log &default="UID_UNKNOWN";
 		## current channel number
@@ -48,11 +53,6 @@ export {
 		host:		string	&log &default="HOST_UNKNOWN";
 		## event name
 		name:		string	&log &default="EVENT_UNKNOWN";
-		## external host: host attached to forward
-		##  tunnel or proxy
-		ext_host:       string  &log &default="FWDHOST_UNKNOWN";
-		## external port: port attached to ext_host address
-		ext_port:       string  &log &default="FWDPORT_UNKNOWN";
 		## event data
 		data:		string	&log &default="DATA_UNKNOWN";
 	};
