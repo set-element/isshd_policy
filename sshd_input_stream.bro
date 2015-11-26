@@ -11,7 +11,7 @@
 module SSHD_IN_STREAM;
 
 export {
-	
+
 	redef enum Notice::Type += {
 		SSHD_INPUT_UnknownEvent,
 		SSHD_INPUT_LowTransactionRate,
@@ -37,10 +37,10 @@ export {
 	const data_file = "/" &redef;
 	# flag to make the current node active re the input framework
 	#  it is activated by setting 'aux_scripts="isshd_policy/init_node"'
-	#  in the etc/node.cfg .  See the isshd_policy/init_node.bro for 
+	#  in the etc/node.cfg .  See the isshd_policy/init_node.bro for
 	#  more details.
 	const DATANODE = F &redef;
-	
+
 	# semiphore for in-fr restart
 	global stop_sem = 0;
 
@@ -50,8 +50,8 @@ export {
 	# track the transaction rate - notice on transition between low and high water rates
 	# this is count per input_test_interval
 	const input_count_test = T &redef;
-	const input_low_water:count = 10 &redef; 
-	const input_high_water:count = 10000 &redef; 
+	const input_low_water:count = 10 &redef;
+	const input_high_water:count = 10000 &redef;
 	const input_test_interval:interval = 60 sec &redef;
 	# track input rate ( events/input_test_interval)
 	global input_count: count = 1 &redef;
@@ -99,10 +99,8 @@ function ssh_string(s: string) : string
 	local ret_str: string = " ";
 
 	if ( |key_val| == 2 ) {
-		# this function will absolutly take care of the decoding
-		#  but is generally not necessisary.
-		#ret_str = raw_unescape_URI( key_val[1] );
-		# default function
+
+		# extract binary version of string
 		ret_str = unescape_URI( key_val[1] );
 		# remove backspace characters
 		ret_str = edit(ret_str, "\x08");
@@ -111,8 +109,8 @@ function ssh_string(s: string) : string
 		ret_str = gsub(ret_str, /\x1b\x5b\x30\x30\x6d/, "");
 		ret_str = gsub(ret_str, /\x1b\x5b./, "");
 
-		ret_str = escape_string(ret_str);	
-		
+		ret_str = escape_string(ret_str);
+
 		}
 	else {
 		ret_str = "NULL";
@@ -164,7 +162,7 @@ function ssh_port(s: string) : port
 
 		if ( p_pm$matched ) {
 			ret_val = to_port(t_port);
-			}	
+			}
 		else {
 			local c_pm = match_pattern( t_port, count_match );
 
@@ -236,7 +234,7 @@ function _auth_info_3(_data: string) : count
 
 function _sftp_process_readlink_3(_data: string) : count
 	{
-	#event sftp_process_readlink_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string) 
+	#event sftp_process_readlink_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
 
 	local parts = split_string(_data, kv_splitter);
 
@@ -248,7 +246,7 @@ function _sftp_process_readlink_3(_data: string) : count
 	local d = ssh_string( parts[6] );
 
 	event sftp_process_readlink_3(ts,version,sid,cid,ppid,d);
-	
+
 	return 0;
 	}
 
@@ -289,7 +287,7 @@ function _sftp_process_setstat_3(_data: string) : count
 
 	return 0;
 	}
-	
+
 function _auth_key_fingerprint_3(_data: string) : count
 	{
 	# event auth_key_fingerprint_3(ts: time, version: string, sid: string, cid: count, fingerprint: string, key_type: string)
@@ -412,7 +410,7 @@ function _channel_notty_analysis_disable_3(_data: string) : count
 		byte_skip = ssh_int( parts[5] );
 		byte_sent = ssh_int( parts[6] );
 		}
-		
+
 	event channel_notty_analysis_disable_3(ts,version,sid,cid,channel,byte_skip,byte_sent);
 
 	return 0;
@@ -636,7 +634,7 @@ function _sftp_process_do_stat_3(_data: string) : count
 
 function _sftp_process_fsetstat_3(_data: string) : count
 	{
-	# event sftp_process_mkdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string) 
+	# event sftp_process_mkdir_3(ts:time, version: string, sid:string, cid:count, ppid: int, data:string)
 	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
@@ -841,7 +839,7 @@ function _sshd_start_3(_data: string) : count
 
 function _session_remote_exec_pty_3(_data: string) : count
 	{
-	# event session_remote_exec_pty_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string) 
+	# event session_remote_exec_pty_3(ts: time, version: string, sid: string, cid: count, channel: count, ppid: count, command: string)
 	local parts = split_string(_data, kv_splitter);
 
 	local ts = ssh_time( parts[1] );
@@ -939,7 +937,7 @@ function _auth_invalid_user_3(_data: string) : count
 	event auth_invalid_user_3(ts,version,sid,cid,uid);
 
 	return 0;
-	}	
+	}
 
 function _channel_port_open_3(_data: string) : count
 	{
@@ -979,7 +977,7 @@ function _channel_portfwd_req_3(_data: string) : count
 	event channel_portfwd_req_3(ts,version,sid,cid,channel,host,fwd_port);
 
 	return 0;
-	}	
+	}
 
 function _channel_post_fwd_listener_3(_data: string) : count
 	{
@@ -1185,8 +1183,8 @@ function _pass_xxx(_data: string) : count
 
 # ### ---------- ###
 #
-# this generates the mapping between the name of the event, and the function that we will use to 
-#  call and generate 
+# this generates the mapping between the name of the event, and the function that we will use to
+#  call and generate
 #
 # ### ---------- ###
 
@@ -1305,7 +1303,7 @@ redef argument_count += {
 
 event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineVals)
 	{
-	local t_d = gsub(LV$d, /\x20\x20/, " ");	
+	local t_d = gsub(LV$d, /\x20\x20/, " ");
 	LV$d = t_d;
 
         local parts = split_string(LV$d, kv_splitter);
@@ -1330,7 +1328,7 @@ event sshLine(description: Input::EventDescription, tpe: Input::Event, LV: lineV
 
                 local delim = /\r|\n/;
                 local t = split_string(LV$d, delim);
-	
+
 		# Quick sanity check here since this is just a guess ...
 		if ( |t| < 2 )
                         return;
@@ -1396,15 +1394,15 @@ event transaction_rate()
 	# rate is too low - send a notice the first time
 	if (input_count_delta <= input_low_water) {
 
-		# only send the notice on the first instance 
+		# only send the notice on the first instance
 		if ( input_count_state != 2 ) {
 			NOTICE([$note=SSHD_INPUT_LowTransactionRate,
 				$msg=fmt("event rate %s per %s", input_count_delta, input_test_interval)]);
 
-			input_count_state = 2; # 2: transaction rate	
+			input_count_state = 2; # 2: transaction rate
 			}
 
-		# Now reset the reader		
+		# Now reset the reader
 		schedule 1 sec { stop_reader() };
 		schedule 10 sec { start_reader() };
 		}
@@ -1412,12 +1410,12 @@ event transaction_rate()
 	# rate is too high - send a notice the first time
 	if (input_count_delta >= input_high_water) {
 
-		# only send the notice on the first instance 
+		# only send the notice on the first instance
 		if ( input_count_state != 2 ) {
 			NOTICE([$note=SSHD_INPUT_HighTransactionRate,
 				$msg=fmt("event rate %s per %s", input_count_delta, input_test_interval)]);
 
-			input_count_state = 2; # 2: transaction rate	
+			input_count_state = 2; # 2: transaction rate
 			}
 		}
 
@@ -1437,7 +1435,7 @@ function init_datastream() : count
 	{
 
 	# input stream setup
-	
+
 	if ( DATANODE && (file_size(data_file) != -1.0) ) {
 		print fmt("%s SSHD data file %s located", gethostname(), data_file);
 
@@ -1447,7 +1445,7 @@ function init_datastream() : count
 
 		Input::add_event([$source=data_file, $config=config_strings, $reader=Input::READER_RAW, $mode=Input::STREAM, $name="isshd", $fields=lineVals, $ev=sshLine]);
 
-		# start rate monitoring for event stream 
+		# start rate monitoring for event stream
 		schedule input_test_interval { transaction_rate() };
 		}
 
