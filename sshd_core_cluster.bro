@@ -28,7 +28,7 @@ export {
 
 	## Record type which contains column fields for the isshd log
 	type Info: record {
-		
+
 		## session start time
 		ts_start:	time	&log;
 		## session current time: note this is not necessisarily current time
@@ -47,7 +47,7 @@ export {
 		uid:		string	&log &default="UID_UNKNOWN";
 		## current channel number
 		channel: 	count	&log &default = 0;
-		## current channel type	
+		## current channel type
 		channel_t:	string	&log &default="D_UNKNOWN";
 		## server host name
 		host:		string	&log &default="HOST_UNKNOWN";
@@ -67,7 +67,7 @@ export {
 
 	# global sshd index for sessions
 	global s_index: count = 0;
-	
+
 	global c_record_clean: function(t: table[count] of int, idx:count) : interval;
 
 	######################################################################################
@@ -80,17 +80,17 @@ export {
 		auth_state: count &default=1;		# used to track logins
 		suspicous_count: count &default = 0;	# running total for suspicous commands
 		#client_tag: count &default = 0;		# unique id
-		start_time: time;			# 
+		start_time: time;			#
 		passwd_skip: count &default = 0;	# how many times passwd entry skipped
 
-		# table of channel types - may need to reinsert state 
+		# table of channel types - may need to reinsert state
 		channel_type: table[count] of string;
 		s_commands: set[string];		# list of suspicous commands entered
 		log_id: string &default = "UNSET";	# tag for logging index; Q: usability vs one less field
 	};
 
 	type server_record: record {
-		# put in a rate monitor here as well ..	
+		# put in a rate monitor here as well ..
 		c_records: table[count] of client_record;	# this is a table of client_record types
 		current_clients: count;				#
 		start_time: time;				#
@@ -102,7 +102,7 @@ export {
 	# this is a table holding all the known server instances
 	global s_records: table[string] of server_record  &persistent &expire_func=s_record_clean &write_expire = 24 hr;
 
-	# When a subsystem is instantiated, the process loses the cid data which is an 
+	# When a subsystem is instantiated, the process loses the cid data which is an
 	#  issue in tracking the behavior.  This table keeps track of the cid as a function
 	#  of the ppid and sid - it will be set when the forking settles down post privsep.
 	global cid_lookup: table[string, int] of count;
@@ -128,7 +128,7 @@ export {
 	global log_session_register: function(CR: client_record) : count;
 	# update interactive data
 	global log_session_update_event: function(CR: client_record, etime: time, e: string, s_data: string) : count;
-	
+
 	global log_server_session: function(SR: server_record, etime: time, e: string, s_data: string) : count;
 	global log_update_uid: function(CR: client_record, uid: string) : count;
 	global log_update_channel: function(CR: client_record, channel: count) : count;
@@ -167,7 +167,7 @@ redef Communication::nodes += {
 };
 
 ######################################################################################
-#  functions 
+#  functions
 ######################################################################################
 
 function create_connection(s_ip: addr, s_port: port, r_ip: addr, r_port: port, ts: time): conn_id
@@ -214,7 +214,7 @@ function test_sid(sid: string): server_record
 	else {
 		t_server_record = s_records[sid];
 	}
-	
+
 	return t_server_record;
 }
 
@@ -249,7 +249,7 @@ function test_cid(sid: string, cid: count): client_record
 		t_client_rec$id$resp_p = 0/tcp;
 
 		# there might be a better way to go about doing this
-		# but this will ensure that the client_record is also 
+		# but this will ensure that the client_record is also
 		#  registered in the logging framework
 		log_session_register(t_client_rec);
 
@@ -267,6 +267,10 @@ function test_cid(sid: string, cid: count): client_record
 function save_cid(sid: string, cid: count, cr: client_record)
 {
 	if ( sid in s_records ) {
+
+	  if ( cid in s_records[sid]$c_records )
+			delete s_records[sid]$c_records[cid];
+
 		s_records[sid]$c_records[cid] = cr;
 	}
 }
@@ -275,14 +279,14 @@ function remove_cid(sid:string, cid:count) : int
 {
 	local ret: int = 1;
 
-	if ( sid in s_records ) 
+	if ( sid in s_records )
 
 		if ( cid in s_records[sid]$c_records ) {
 
 			# now that we have a record, start removing things
 			local c: count;
 
-			# remove the client record channels 
+			# remove the client record channels
 			for ( c in s_records[sid]$c_records[cid]$channel_type )
 				delete s_records[sid]$c_records[cid]$channel_type[c];
 
@@ -297,7 +301,7 @@ function remove_cid(sid:string, cid:count) : int
 	return ret;
 }
 
-# calls remove_cid() 
+# calls remove_cid()
 function remove_sid(sid:string) : int
 	{
 	local ret: int = 1;
@@ -338,11 +342,11 @@ function print_sid(sid: string) : string
 	if ( |split_on_space| > 1 )
 		ret_val = split_on_space[1];
 	else {
-		# It might be the case that the sid is of the form 
+		# It might be the case that the sid is of the form
 		#  5173_cvrsvc01_22 in which case we must snip on a
 		#  different value ...
 		local split_on_score = split_string(sid, /_/);
-	
+
 		if ( |split_on_score| > 1 )
 			ret_val = split_on_score[1];
 		}
@@ -352,7 +356,7 @@ function print_sid(sid: string) : string
 
 function print_channel(CR: client_record, channel: count) : string
 	{
-	# if the channel value exists, return it, else set the 
+	# if the channel value exists, return it, else set the
 	#  value to ret_value and set it.
 	local ret_value: string = "UNKNOWN";
 
@@ -388,7 +392,7 @@ function register_cid(sid: string, cid: count, ppid: int) : count
 		}
 	else
 		ret = 1;
- 
+
 	return ret;
 	}
 
@@ -408,7 +412,7 @@ function log_session_register(CR: client_record) : count
 	t_id$resp_p = CR$id$resp_p;
 	session$id = t_id;
 	session$key = key;
-	
+
 	s_logging[key] = session;
 	return 0;
 }
@@ -457,7 +461,7 @@ function log_session_update_event(CR: client_record, etime: time, e: string, s_d
 	Log::write(LOG, t_Info);
 
 	s_logging[CR$log_id] = t_Info;
-	return ret;	
+	return ret;
 }
 
 function log_update_uid(CR: client_record, uid: string) : count
@@ -474,14 +478,14 @@ function log_update_uid(CR: client_record, uid: string) : count
 	# now update the event and data
 	if ( CR$log_id in s_logging )
 		t_Info = s_logging[CR$log_id];
-	else 
+	else
 		return ret;
 
 	t_Info$uid = uid;
 
 	s_logging[CR$log_id] = t_Info;
 	ret = 1;
-	return ret;	
+	return ret;
 }
 
 function log_update_channel(CR: client_record, channel: count) : count
@@ -498,7 +502,7 @@ function log_update_channel(CR: client_record, channel: count) : count
 	# now update the event and data
 	if ( CR$log_id in s_logging )
 		t_Info = s_logging[CR$log_id];
-	else 
+	else
 		return ret;
 
 	t_Info$channel = channel;
@@ -507,7 +511,7 @@ function log_update_channel(CR: client_record, channel: count) : count
 	s_logging[CR$log_id] = t_Info;
 
 	ret = 1;
-	return ret;	
+	return ret;
 }
 
 function log_update_forward(CR: client_record, forward_host: string, h_port: port) : count
@@ -524,7 +528,7 @@ function log_update_forward(CR: client_record, forward_host: string, h_port: por
 	# now update the event and data
 	if ( CR$log_id in s_logging )
 		t_Info = s_logging[CR$log_id];
-	else 
+	else
 		return ret;
 
 	t_Info$ext_host = forward_host;
@@ -532,7 +536,7 @@ function log_update_forward(CR: client_record, forward_host: string, h_port: por
 
 	s_logging[CR$log_id] = t_Info;
 	ret = 1;
-	return ret;	
+	return ret;
 }
 
 function log_update_host(CR: client_record, host: string) : count
@@ -548,7 +552,7 @@ function log_update_host(CR: client_record, host: string) : count
 	# now update the event and data
 	if ( CR$log_id in s_logging )
 		t_Info = s_logging[CR$log_id];
-	else 
+	else
 		return ret;
 
 	t_Info$host = host;
@@ -561,7 +565,7 @@ function log_update_host(CR: client_record, host: string) : count
 
 	s_logging[CR$log_id] = t_Info;
 	ret = 1;
-	return ret;	
+	return ret;
 }
 
 function get_info_key(CR: client_record) : string
@@ -578,7 +582,7 @@ function get_info_key(CR: client_record) : string
 	# now update the event and data
 	if ( CR$log_id in s_logging )
 		t_Info = s_logging[CR$log_id];
-	else 
+	else
 		return ret_val;
 
 	return t_Info$key;
@@ -589,7 +593,7 @@ function get_info_key(CR: client_record) : string
 ######################################################################################
 
 # Rather than having a bunch of events for every type of auth/meth/state, we just
-#  wrap it all up into one big event.  
+#  wrap it all up into one big event.
 # Currently authmesg: {Postponed, Accepted, Failed}
 # 	method: typically password, publickey, hostbased, keyboard-interactive/pam
 #
@@ -616,14 +620,14 @@ event auth_info_3(ts: time, version: string, sid: string, cid: count, authmsg: s
 
 	# log data
 	log_update_uid(CR,uid);
-	log_session_update_event(CR, ts, "AUTH_INFO_3", s_data); 
+	log_session_update_event(CR, ts, "AUTH_INFO_3", s_data);
 
 	# this is for the generation of the USER_CORE::auth_transaction_token token
-	#  which duplicates most of the info 
+	#  which duplicates most of the info
 	local t_key = get_info_key(CR);
-	
+
 	event USER_CORE::auth_transaction(ts, CR$log_id, CR$id, uid, print_sid(sid), "isshd", "authentication", authmsg, meth, t_key);
-} 
+}
 
 
 event auth_invalid_user_3(ts: time, version: string, sid: string, cid: count, uid: string)
@@ -635,7 +639,7 @@ event auth_invalid_user_3(ts: time, version: string, sid: string, cid: count, ui
 		CR$id$orig_h, CR$id$orig_p, CR$id$resp_h, CR$id$resp_p, uid);
 
 	log_update_uid(CR,uid);
-	log_session_update_event(CR, ts, "AUTH_INVALID_USER_3", s_data); 
+	log_session_update_event(CR, ts, "AUTH_INVALID_USER_3", s_data);
 }
 
 
@@ -644,8 +648,8 @@ event auth_key_fingerprint_3(ts: time, version: string, sid: string, cid: count,
 	local CR:client_record = test_cid(sid,cid);
 
 	local s_data = fmt("%s type %s", fingerprint, key_type);
-	
-	log_session_update_event(CR, ts, "AUTH_KEY_FINGERPRINT_3", s_data); 
+
+	log_session_update_event(CR, ts, "AUTH_KEY_FINGERPRINT_3", s_data);
 
 	# this is for the generation of the USER_CORE::auth_transaction_token token
 	# create a map for ses-key <-> fingerprint
@@ -655,17 +659,17 @@ event auth_key_fingerprint_3(ts: time, version: string, sid: string, cid: count,
 
 event auth_pass_attempt_3(ts: time, version: string, sid: string, cid: count, uid: string, password: string)
 {
-	# previously this would only get called if the sshd has been configured with the 
+	# previously this would only get called if the sshd has been configured with the
 	#  --with-passwdrec option set
-	# now if the option has been set you will get the password, else you will be delivered 
+	# now if the option has been set you will get the password, else you will be delivered
 	# a hash of the passwod.  Since the hash might be cleaned up a bit by the URI decoding,
 	# the MD5 is taken of the total.
 	#
 	local CR:client_record = test_cid(sid,cid);
 
-	local s_data = fmt("%s",password);	
+	local s_data = fmt("%s",password);
 
-	log_session_update_event(CR, ts, "AUTH_PASS_ATTEMPT_3", s_data); 
+	log_session_update_event(CR, ts, "AUTH_PASS_ATTEMPT_3", s_data);
 
 	# test to see if the uid has already been assigned or is 'UID_UNKNOWN'
 	if ( CR$uid == "UID_UNKNOWN" )
@@ -677,7 +681,7 @@ event channel_data_client_3(ts: time, version: string, sid: string, cid: count, 
 	# general event for client data from a typical login shell
 	local CR:client_record = test_cid(sid,cid);
 
-	log_session_update_event(CR, ts, "CHANNEL_DATA_CLIENT_3", data); 
+	log_session_update_event(CR, ts, "CHANNEL_DATA_CLIENT_3", data);
 }
 
 event channel_data_server_3(ts: time, version: string, sid: string, cid: count, channel:count, data:string)
@@ -685,7 +689,7 @@ event channel_data_server_3(ts: time, version: string, sid: string, cid: count, 
 	# general event for client data from a typical login shell
 	local CR:client_record = test_cid(sid,cid);
 
-	log_session_update_event(CR, ts, "CHANNEL_DATA_SERVER_3", data); 
+	log_session_update_event(CR, ts, "CHANNEL_DATA_SERVER_3", data);
 }
 
 event channel_data_server_sum_3(ts: time, version: string, sid: string, cid: count, channel: count, bytes_skip: count)
@@ -705,6 +709,9 @@ event channel_free_3(ts: time, version: string, sid: string, cid: count,channel:
 	local s_data = fmt("%s %s",  channel,print_channel(CR,channel));
 
 	log_session_update_event(CR, ts, "CHANNEL_FREE_3", s_data);
+
+	if ( channel in CR$channel_type )
+		delete CR$channel_type[channel];
 }
 
 event channel_new_3(ts: time, version: string, sid: string, cid: count, found: count, ctype: count, name: string)
@@ -765,10 +772,10 @@ event channel_pass_skip_3(ts: time, version: string, sid: string, cid: count, ch
 
 		NOTICE([$note=SSHD_PasswdThresh,
 			$msg=fmt("SKIP: %s %s %s-%s %s %s %s @ %s -> %s:%s",
-				password_threshold, CR$log_id, channel, print_channel(CR,channel), sid, cid, CR$uid, 
+				password_threshold, CR$log_id, channel, print_channel(CR,channel), sid, cid, CR$uid,
 				CR$id$orig_h, CR$id$resp_h, CR$id$resp_p )]);
 	}
-	
+
 	local s_data = fmt("%s %s",  channel,print_channel(CR,channel));
 
 	log_session_update_event(CR, ts, "CHANNEL_PASS_SKIP_3", s_data);
@@ -781,14 +788,14 @@ event channel_port_open_3(ts: time, version: string, sid: string, cid: count, ch
 {
 	# rtype: type of port open { direct-tcpip, dynamic-tcpip, forwarded-tcpip }
 	# l_port: port being listened for forwards
-	# path: path for unix domain sockets, or host name for forwards 
+	# path: path for unix domain sockets, or host name for forwards
 	# h_port: remote port to connect for forwards
 	# rem_host: remote IP addr
 	# rep_port: remote port
 
 	local CR:client_record = test_cid(sid,cid);
 
-	local s_data = fmt("listen port %s for %s %s:%s -> %s:%s",  
+	local s_data = fmt("listen port %s for %s %s:%s -> %s:%s",
 		rtype, l_port, rem_host, rem_port, path, h_port);
 
 	log_session_update_event(CR, ts, "CHANNEL_PORT_OPEN_3", s_data);
@@ -825,9 +832,9 @@ event channel_set_fwd_listener_3(ts: time, version: string, sid: string, cid: co
 	# wildcard: 0=no wildcard, 1=
 	#	 "0.0.0.0"               -> wildcard v4/v6 if SSH_OLD_FORWARD_ADDR
 	# 	 "" (empty string), "*"  -> wildcard v4/v6
-	# 
+	#
 	# forward_host: host to forward to
-	# l_port: port being listened for forwards 
+	# l_port: port being listened for forwards
 	# h_port: remote port to connect for forwards
 
 	local CR:client_record = test_cid(sid,cid);
@@ -840,8 +847,8 @@ event channel_set_fwd_listener_3(ts: time, version: string, sid: string, cid: co
 event channel_socks4_3(ts: time, version: string, sid: string, cid: count, channel: count, path: string, h_port: port, command: count, username: string)
 {
 	# decoded socks4 header
-	# 
-	# path: path for unix domain sockets, or host name for forwards 
+	#
+	# path: path for unix domain sockets, or host name for forwards
 	# h_port: remote port to connect for forwards
 	# command: typically '1' - will get translation XXX
 	# username: username provided by socks request, need not be the same as the uid
@@ -857,8 +864,8 @@ event channel_socks5_3(ts: time, version: string, sid: string, cid: count, chann
 {
 	# decoded socks5 header: this can be called multiple times per channel
 	#  since the ports5 interface is somewhat more complicated
-	# 
-	# path: path for unix domain sockets, or host name for forwards 
+	#
+	# path: path for unix domain sockets, or host name for forwards
 	# h_port: remote port to connect for forwards
 	# command: see const set for additional data
 
@@ -883,7 +890,7 @@ event session_channel_request_3(ts: time, version: string, sid: string, cid: cou
 	local s_data = fmt("%s", to_upper(rtype));
 
 	if ( to_upper(rtype) == "SUBSYSTEM" ) {
-		# In an effort to track subsystem events like sftp, we need to get an index entry 
+		# In an effort to track subsystem events like sftp, we need to get an index entry
 		#  for the cid lookup based on sid + pid
 		# If there is a value in place we run it over - it should have been cleaned up
 		#  in the session_exit event...
@@ -899,7 +906,7 @@ event session_channel_request_3(ts: time, version: string, sid: string, cid: cou
 
 event session_do_auth_3(ts: time, version: string, sid: string, cid: count, atype: count, type_ret: count)
 {
-	# This is for version 1 of the protocol.  Seems like a great deal of work 
+	# This is for version 1 of the protocol.  Seems like a great deal of work
 	#  for something that I really hope not to see ....
 	#
 	# Prepares for an interactive session.  This is called after the user has
@@ -911,7 +918,7 @@ event session_do_auth_3(ts: time, version: string, sid: string, cid: count, atyp
 
 	local t_type_ret: string;
 
-	if ( type_ret == 2 ) 
+	if ( type_ret == 2 )
 		t_type_ret = "ATTEMPT";
 	else if ( type_ret == 1 )
 		t_type_ret = "SUCCESS";
@@ -932,12 +939,14 @@ event session_exit_3(ts: time, version: string, sid: string, cid: count, channel
 	# on session exit, remove the entry asosciated with the subsystem
         local split_cln = split_string(sid, /:/);
         local t_sid = fmt("%s:%s", split_cln[1], split_cln[2]);
-	
+
 	if ( [t_sid,pid] in cid_lookup ) {
 		delete cid_lookup[t_sid, pid];
 	}
 
 	log_session_update_event(CR, ts, "SESSION_EXIT_3", "SESSION_EXIT_3");
+
+	remove_cid(sid, cid);
 }
 
 event session_input_channel_open_3(ts: time, version: string, sid: string, cid: count, tpe: count, ctype: string, rchan: int, rwindow: int, rmaxpack: int)
@@ -946,20 +955,20 @@ event session_input_channel_open_3(ts: time, version: string, sid: string, cid: 
 	# ctype: one of { session, direct-tcpip, tun@openssh.com }
 	# rchan: channel identifier for remote peer
 	# rwindow: window size for channel
-	# rmaxpack: max 'packet' for remote window 
+	# rmaxpack: max 'packet' for remote window
 	#
 
 	local CR:client_record = test_cid(sid,cid);
-	# XXX 
+	# XXX
 	# rchan is a guess - look and see what the actual values are
 	#
-	
+
 	if ( int_to_count(rchan) !in CR$channel_type )
 		{
 			CR$channel_type[int_to_count(rchan)] = "unknown";
 		}
 
-	local s_data = fmt("ctype %s rchan %d win %d max %d",  
+	local s_data = fmt("ctype %s rchan %d win %d max %d",
 		ctype, rchan, rwindow, rmaxpack);
 
 	log_update_channel(CR, int_to_count(rchan));
@@ -973,7 +982,7 @@ event session_new_3(ts: time, version: string, sid: string, cid: count, pid: int
 	log_update_host(CR, print_sid(sid) );
 	log_session_update_event(CR, ts, "SESSION_NEW_3", "SESSION_NEW_3");
 
-	# In an effort to track subsystem events like sftp, we need to get an index entry 
+	# In an effort to track subsystem events like sftp, we need to get an index entry
 	#  for the cid lookup based on sid + pid
 	# If there is a value in place we run it over - it should have been cleaned up
 	#  in the session_exit event...
@@ -1044,7 +1053,7 @@ event session_tun_init_3(ts: time, version: string, sid: string, cid: count, cha
 event session_x11fwd_3(ts: time, version: string, sid: string, cid: count, channel: count, display: string)
 {
 	# the string 'display' is generated from the following c code snippet:
-	# session.c: 
+	# session.c:
 	#	snprintf(display, sizeof display, "%.400s:%u.%u", hostname,
 	#	    s->display_number, s->screen);
 
