@@ -1,9 +1,12 @@
-# 04/04/11: Scott Campbell
-#
+# 01/21/18: Scott Campbell
+# v. 0.2
+# 
 # Framework for converting local policy into analysis of behavior
 #
 # The idea is that the same events processed by core will also be processed here, except
 #  that the local site policy will be audited (and possible enforced ehre).
+#
+# Remove |s_set| == 0 test as it would fail a two part detection
 #
 
 @load isshd_policy/sshd_core_cluster
@@ -121,6 +124,9 @@ function parse_line(data: string, t: count) : set[string]
 	#
 	# note that the whitelist test is run against the entire semicolin delim
 	#  set since it is designed to deal with context
+	#
+	# In order to address multi-part sigs for attack patterns, add a two-part
+	#   test for detection. 
 	#
 
 	local return_set: set[string];
@@ -280,16 +286,10 @@ function test_hostile_client(data:string, CR: SSHD_CORE::client_record, channel:
 		local s_set_element: string = " ";
 
 		s_set = parse_line(data, LINE_CLIENT);	
-
-		# If data contains a locally whitelisted element, then
-		#  the return vlue here might be empty.  If so, then
-		#  bail
-		if ( |s_set| == 0 )
-			return ret;
-
 		local ret_str: string = " ";
 
-		# glue the mess together
+		# glue the s_set retuen values together - will be identified separately 
+		#   in the NOTICE below
 		for ( s_set_element in s_set ) {
 			ret_str = fmt("%s %s", ret_str, s_set_element);
 		}
@@ -327,16 +327,10 @@ function test_hostile_server(data:string, CR: SSHD_CORE::client_record, channel:
 		local s_set_element: string = " ";
 
 		s_set = parse_line(data, LINE_SERVER);	
-
-		# if data contains a locally whitelisted element, then
-		#  the return value here might be empty.  If so, then
-		#  bail
-		if ( |s_set| == 0 )
-			return ret;
-
 		local ret_str: string = " ";
 
-		# glue the mess together
+		# glue the s_set retuen values together - will be identified separately 
+		#   in the NOTICE below
 		for ( s_set_element in s_set ) {
 			ret_str = fmt("%s %s", ret_str, s_set_element);
 		}
